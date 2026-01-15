@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation"
 
-import { OrganizationProfileView } from "@/components/organization/organization-profile-view"
+import { OrganizationProfileEdit } from "@/components/organization/organization-profile-edit"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export const metadata = {
-  title: "Organization",
+  title: "Edit Organization",
 }
 
-export default async function OrganizationProfilePage() {
+export default async function OrganizationEditPage() {
   const supabase = await createSupabaseServerClient()
   const { data: userData } = await supabase.auth.getUser()
   const user = userData.user
@@ -20,7 +20,7 @@ export default async function OrganizationProfilePage() {
 
   const { data: orgRows } = await supabase
     .from("org_members")
-    .select("org_id, organizations ( id, name, join_code, avatar_emoji, avatar_color, created_at )")
+    .select("org_id, organizations ( id, name, avatar_emoji, avatar_color )")
     .eq("user_id", user.id)
 
   const organizations =
@@ -36,31 +36,25 @@ export default async function OrganizationProfilePage() {
     redirect("/onboarding")
   }
 
-  // Get member count
-  const { count: memberCount } = await supabase
-    .from("org_members")
-    .select("*", { count: 'exact', head: true })
-    .eq("org_id", activeOrg.id)
-
-  // Check if user can edit (using RPC function)
+  // Check permission
   const { data: canEditData } = await supabase.rpc('has_permission', {
     check_org_id: activeOrg.id,
     permission_name: 'org.edit_settings'
   })
+  
+  if (canEditData !== true) {
+    redirect("/dashboard/organization")
+  }
 
   return (
     <div className="flex flex-1 items-start justify-center p-6">
-      <OrganizationProfileView
+      <OrganizationProfileEdit
         organization={{
           id: activeOrg.id,
           name: activeOrg.name,
-          join_code: activeOrg.join_code,
           avatar_emoji: activeOrg.avatar_emoji ?? "🤝",
           avatar_color: activeOrg.avatar_color ?? "#f2b5b5",
-          created_at: activeOrg.created_at,
         }}
-        canEdit={canEditData === true}
-        memberCount={memberCount || 0}
       />
     </div>
   )
