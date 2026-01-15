@@ -2,9 +2,38 @@ import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { Skeleton } from "@/components/ui/skeleton"
+import type { Metadata } from "next"
+import { createSupabaseServerClient } from "@/lib/supabase/server"
 
-export const metadata = {
-  title: "Overview",
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createSupabaseServerClient()
+  const { data } = await supabase.auth.getUser()
+  const user = data.user
+
+  if (!user) {
+    return { title: "Overview - Bernas" }
+  }
+
+  const metadata = (user.user_metadata ?? {}) as { active_org_id?: string }
+  const { data: orgRows } = await supabase
+    .from("org_members")
+    .select("org_id, organizations ( id, name )")
+    .eq("user_id", user.id)
+
+  const organizations =
+    orgRows
+      ?.map((row: any) => row.organizations)
+      .filter(Boolean) ?? []
+
+  const activeOrg =
+    organizations.find((org: any) => org.id === metadata.active_org_id) ??
+    organizations[0]
+
+  const orgName = activeOrg?.name ?? "Bernas"
+
+  return {
+    title: `Overview - ${orgName}`,
+  }
 }
 
 export default async function Page() {

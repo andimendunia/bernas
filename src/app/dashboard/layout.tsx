@@ -38,9 +38,9 @@ export default async function DashboardLayout({
 
   const organizations =
     orgRows
-      ?.map((row) => row.organizations)
+      ?.map((row: any) => row.organizations)
       .filter(Boolean)
-      .map((org) => ({
+      .map((org: any) => ({
         id: org.id,
         name: org.name,
         plan: org.tier === "pro" ? "Pro" : "Free",
@@ -51,6 +51,12 @@ export default async function DashboardLayout({
   if (organizations.length === 0) {
     redirect("/onboarding")
   }
+
+  // Check if user is admin of active org
+  const activeOrg = organizations.find(org => org.id === metadata.active_org_id) ?? organizations[0]
+  const { data: isAdminData } = await supabase.rpc('is_org_admin', {
+    check_org_id: activeOrg.id
+  })
 
   const resolvedName =
     metadata.full_name ||
@@ -70,6 +76,7 @@ export default async function DashboardLayout({
         user={sidebarUser}
         organizations={organizations}
         activeOrgId={metadata.active_org_id ?? null}
+        isAdmin={isAdminData === true}
       />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
@@ -98,11 +105,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const organizations =
     orgRows
-      ?.map((row) => row.organizations)
+      ?.map((row: any) => row.organizations)
       .filter(Boolean) ?? []
 
   const activeOrg =
-    organizations.find((org) => org.id === metadata.active_org_id) ??
+    organizations.find((org: any) => org.id === metadata.active_org_id) ??
     organizations[0]
 
   const orgName = activeOrg?.name ?? "Bernas"

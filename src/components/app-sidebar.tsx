@@ -47,6 +47,7 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   user?: SidebarUser
   organizations?: OrganizationTeam[]
   activeOrgId?: string | null
+  isAdmin?: boolean
 }
 
 const data = {
@@ -68,10 +69,6 @@ const data = {
       icon: Diamond,
       items: [
         {
-          title: "All events",
-          url: "/dashboard/events",
-        },
-        {
           title: "Event tags",
           url: "/dashboard/events/tags",
         },
@@ -87,10 +84,6 @@ const data = {
       icon: FolderKanban,
       items: [
         {
-          title: "All tasks",
-          url: "/dashboard/tasks",
-        },
-        {
           title: "My tasks",
           url: "/dashboard/tasks/mine",
         },
@@ -102,25 +95,34 @@ const data = {
       icon: Link,
     },
   ],
-  projects: [
-    {
-      name: "Member",
-      url: "/dashboard/organization/members",
-      icon: Users,
-    },
-  ],
 }
 
 export function AppSidebar({
   user = fallbackUser,
   organizations = [],
   activeOrgId,
+  isAdmin = false,
   ...props
 }: AppSidebarProps) {
   const activeOrgName =
     organizations.find((org) => org.id === activeOrgId)?.name ??
     organizations[0]?.name ??
     "Organization"
+
+  const projects = [
+    {
+      name: "Organization profile",
+      url: "/dashboard/organization",
+    },
+    {
+      name: "Members",
+      url: "/dashboard/organization/members",
+    },
+    ...(isAdmin ? [{
+      name: "Administration",
+      url: "/dashboard/organization/administration",
+    }] : []),
+  ]
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -129,7 +131,7 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects label={activeOrgName} projects={data.projects} />
+        <NavProjects label={activeOrgName} projects={projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
