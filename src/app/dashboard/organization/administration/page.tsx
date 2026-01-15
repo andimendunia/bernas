@@ -60,12 +60,7 @@ export default async function AdministrationPage() {
     permissions = results[1]
     joinRequests = results[2]
     orgData = results[3]
-    
-    console.log('Server - Permissions fetched:', permissions?.length)
-    console.log('Server - Roles fetched:', roles?.length)
-    console.log('Server - First permission:', permissions?.[0])
   } catch (error) {
-    console.error('Error fetching data:', error)
     // Set empty arrays as fallback
     permissions = []
     roles = []

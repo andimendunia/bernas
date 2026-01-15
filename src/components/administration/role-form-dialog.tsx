@@ -56,8 +56,6 @@ export function RoleFormDialog({
 
   // Group permissions by category
   const permissionsByCategory = React.useMemo(() => {
-    console.log('Permissions received:', permissions)
-    console.log('Permissions count:', permissions.length)
     const grouped: Record<string, Permission[]> = {}
     permissions.forEach((permission) => {
       if (!grouped[permission.category]) {
@@ -65,7 +63,6 @@ export function RoleFormDialog({
       }
       grouped[permission.category].push(permission)
     })
-    console.log('Grouped permissions:', grouped)
     return grouped
   }, [permissions])
 
