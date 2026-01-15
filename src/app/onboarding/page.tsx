@@ -197,34 +197,30 @@ export default function OnboardingPage() {
     setLoading(true)
     setError(null)
 
-    const { data: orgData, error: orgError } = await supabase.rpc(
-      "join_org_by_code",
+    const { data: requestId, error: requestError } = await supabase.rpc(
+      "create_join_request",
       {
         join_code: joinCode,
       }
     )
 
-    if (orgError || !orgData) {
-      setError("Could not join the organization yet.")
-      setLoading(false)
+    setLoading(false)
+
+    if (requestError) {
+      console.error('Join request error:', requestError)
+      if (requestError.message.includes('Invalid join code')) {
+        setError("Invalid join code. Please check and try again.")
+      } else if (requestError.message.includes('Already a member')) {
+        setError("You are already a member of this organization.")
+      } else {
+        setError(`Could not send join request: ${requestError.message}`)
+      }
       return
     }
 
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: {
-        onboarded: true,
-        org_id: orgData,
-        active_org_id: orgData,
-      },
-    })
-
-    if (updateError) {
-      setError("Joined the organization, but onboarding is incomplete.")
-      setLoading(false)
-      return
-    }
-
-    router.push("/dashboard")
+    // Show success message - request sent and pending approval
+    setJoinCode("")
+    alert("Join request sent successfully! An admin needs to approve your request before you can access the organization.")
   }
 
   const mode = searchParams.get("mode")
