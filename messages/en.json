@@ -1,0 +1,68 @@
+{
+  "home": {
+    "nav": {
+      "product": "Product",
+      "howItWorks": "How it works",
+      "repository": "Repository",
+      "contact": "Contact"
+    },
+    "hero": {
+      "badge": "Built for LSMs in Indonesia",
+      "title": "Bernas keeps NGO programs moving with clear events and participation.",
+      "subtitle": "Coordinate events, tasks, and shared resources while tracking participation intent beyond attendance.",
+      "ctaPrimary": "Request access",
+      "ctaSecondary": "See the model"
+    },
+    "stats": {
+      "organizations": "LSMs on the waitlist",
+      "events": "Events planned per month",
+      "participation": "Participation statuses tracked"
+    },
+    "tabs": {
+      "events": "Events",
+      "tasks": "Tasks",
+      "resources": "Repository"
+    },
+    "features": {
+      "events": {
+        "title": "Event hubs for every program",
+        "desc": "Create events with tags, custom fields, and clear objectives so everyone moves in sync."
+      },
+      "tasks": {
+        "title": "Single-assignee task clarity",
+        "desc": "Each task has one owner, a deadline, and a simple three-stage status."
+      },
+      "resources": {
+        "title": "Shared repository, linked everywhere",
+        "desc": "Attach Google Drive or link-based resources to organizations, events, or tasks."
+      }
+    },
+    "participation": {
+      "title": "Participation intent is not attendance",
+      "subtitle": "Bernas lets members confirm how they will support an event even if they are not physically present.",
+      "full": "Full participation",
+      "partial": "Partial participation",
+      "declined": "Declined"
+    },
+    "repository": {
+      "title": "Repository for every context",
+      "items": [
+        "Attach Drive folders or files to events.",
+        "Link resources directly to tasks.",
+        "Keep organization-wide references in one place."
+      ]
+    },
+    "contact": {
+      "title": "Talk to us about your LSM",
+      "subtitle": "Tell us about your program size, and we will help you get started.",
+      "name": "Name",
+      "email": "Email",
+      "org": "Organization",
+      "message": "What are you planning?",
+      "submit": "Send request"
+    },
+    "footer": {
+      "tagline": "SaaS for NGOs and LSMs managing events and participation."
+    }
+  }
+}
