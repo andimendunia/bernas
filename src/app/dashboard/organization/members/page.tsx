@@ -1,12 +1,58 @@
+import { redirect } from "next/navigation"
+
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { Card } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { MemberListWrapper } from "@/components/members/member-list-wrapper"
+import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { getOrgMembers } from "@/lib/permissions-server"
 
 export const metadata = {
   title: "Members",
 }
 
-export default function OrganizationMembersPage() {
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+export default async function OrganizationMembersPage() {
+  const supabase = await createSupabaseServerClient()
+  const { data: userData } = await supabase.auth.getUser()
+  const user = userData.user
+
+  if (!user) {
+    redirect("/auth/sign-in")
+  }
+
+  const metadata = (user.user_metadata ?? {}) as { active_org_id?: string }
+  const activeOrgId = metadata.active_org_id
+
+  if (!activeOrgId) {
+    redirect("/onboarding")
+  }
+
+  // Check if user can view members
+  const { data: canViewData } = await supabase.rpc('has_permission', {
+    check_org_id: activeOrgId,
+    permission_name: 'members.view'
+  })
+
+  if (canViewData !== true) {
+    redirect("/dashboard")
+  }
+
+  // Get members
+  const members = await getOrgMembers(activeOrgId)
+
+  // Check permissions
+  const { data: canChangeRoleData } = await supabase.rpc('has_permission', {
+    check_org_id: activeOrgId,
+    permission_name: 'members.change_role'
+  })
+
+  const { data: canRemoveData } = await supabase.rpc('has_permission', {
+    check_org_id: activeOrgId,
+    permission_name: 'members.remove'
+  })
+
   return (
     <div className="flex flex-1 flex-col">
       <DashboardHeader
@@ -15,29 +61,11 @@ export default function OrganizationMembersPage() {
         sectionLabel="Organization"
       />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <Card className="p-6">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <Skeleton className="h-10 w-full md:w-72" />
-            <Skeleton className="h-10 w-36" />
-          </div>
-          <div className="mt-4 grid gap-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={`member-row-${index}`}
-                className="flex items-center justify-between rounded-lg border border-border p-4"
-              >
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                </div>
-                <Skeleton className="h-6 w-20" />
-              </div>
-            ))}
-          </div>
-        </Card>
+        <MemberListWrapper
+          members={members}
+          canChangeRole={canChangeRoleData === true}
+          canRemove={canRemoveData === true}
+        />
       </div>
     </div>
   )
