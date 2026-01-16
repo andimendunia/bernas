@@ -71,8 +71,8 @@ export default async function AdministrationPage() {
     <div className="flex flex-1 flex-col">
       <DashboardHeader
         title="Administration"
-        sectionHref="/dashboard/organization"
-        sectionLabel="Organization"
+        sectionHref="/dashboard/organization/info"
+        sectionLabel={orgData.data?.name || 'Organization'}
       />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <AdministrationTabs

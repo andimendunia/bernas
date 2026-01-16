@@ -5,7 +5,6 @@ import { Search, MoreHorizontal } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,7 +72,7 @@ export function MemberList({
 
   return (
     <>
-      <Card className="p-6">
+      <div className="w-full">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="relative flex-1 md:max-w-sm">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -160,7 +159,7 @@ export function MemberList({
             ))
           )}
         </div>
-      </Card>
+      </div>
 
       {selectedMember && (
         <>

@@ -1,19 +1,19 @@
 import { redirect } from "next/navigation"
 
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { MemberListWrapper } from "@/components/members/member-list-wrapper"
+import { OrganizationInfoWrapper } from "@/components/organization/organization-info-wrapper"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { getOrgMembers } from "@/lib/permissions-server"
 
 export const metadata = {
-  title: "Members",
+  title: "Organization",
 }
 
-// Force dynamic rendering to prevent caching
+// Force dynamic rendering
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export default async function OrganizationMembersPage() {
+export default async function OrganizationInfoPage() {
   const supabase = await createSupabaseServerClient()
   const { data: userData } = await supabase.auth.getUser()
   const user = userData.user
@@ -29,26 +29,33 @@ export default async function OrganizationMembersPage() {
     redirect("/onboarding")
   }
 
-  // Check if user can view members
-  const { data: canViewData } = await supabase.rpc('has_permission', {
-    check_org_id: activeOrgId,
-    permission_name: 'members.view'
-  })
+  const { data: orgRows } = await supabase
+    .from("org_members")
+    .select("org_id, organizations ( id, name, join_code, avatar_emoji, avatar_color, created_at )")
+    .eq("user_id", user.id)
 
-  if (canViewData !== true) {
-    redirect("/dashboard")
+  const organizations =
+    orgRows
+      ?.map((row: any) => row.organizations)
+      .filter(Boolean) ?? []
+
+  const activeOrg =
+    organizations.find((org: any) => org.id === activeOrgId) ??
+    organizations[0]
+
+  if (!activeOrg) {
+    redirect("/onboarding")
   }
 
-  // Get org name and members
-  const { data: orgData } = await supabase
-    .from("organizations")
-    .select("name")
-    .eq("id", activeOrgId)
-    .single()
-
+  // Get members
   const members = await getOrgMembers(activeOrgId)
 
   // Check permissions
+  const { data: canEditData } = await supabase.rpc('has_permission', {
+    check_org_id: activeOrgId,
+    permission_name: 'org.edit_settings'
+  })
+
   const { data: canChangeRoleData } = await supabase.rpc('has_permission', {
     check_org_id: activeOrgId,
     permission_name: 'members.change_role'
@@ -62,12 +69,21 @@ export default async function OrganizationMembersPage() {
   return (
     <div className="flex flex-1 flex-col">
       <DashboardHeader
-        title="Members"
+        title="Organization info"
         sectionHref="/dashboard/organization/info"
-        sectionLabel={orgData?.name || 'Organization'}
+        sectionLabel={activeOrg.name}
       />
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <MemberListWrapper
+      <div className="flex flex-1 items-start justify-center p-4 pt-0">
+        <OrganizationInfoWrapper
+          organization={{
+            id: activeOrg.id,
+            name: activeOrg.name,
+            join_code: activeOrg.join_code,
+            avatar_emoji: activeOrg.avatar_emoji ?? "🤝",
+            avatar_color: activeOrg.avatar_color ?? "#f2b5b5",
+            created_at: activeOrg.created_at,
+          }}
+          canEdit={canEditData === true}
           members={members}
           canChangeRole={canChangeRoleData === true}
           canRemove={canRemoveData === true}

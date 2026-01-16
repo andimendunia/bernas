@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 
-import { OrganizationProfileEdit } from "@/components/organization/organization-profile-edit"
+import { DashboardHeader } from "@/components/dashboard/dashboard-header"
+import { OrganizationEdit } from "@/components/organization/organization-edit"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export const metadata = {
@@ -43,19 +44,26 @@ export default async function OrganizationEditPage() {
   })
   
   if (canEditData !== true) {
-    redirect("/dashboard/organization")
+    redirect("/dashboard/organization/info")
   }
 
   return (
-    <div className="flex flex-1 items-start justify-center p-6">
-      <OrganizationProfileEdit
-        organization={{
-          id: activeOrg.id,
-          name: activeOrg.name,
-          avatar_emoji: activeOrg.avatar_emoji ?? "🤝",
-          avatar_color: activeOrg.avatar_color ?? "#f2b5b5",
-        }}
+    <div className="flex flex-1 flex-col">
+      <DashboardHeader
+        title="Edit"
+        sectionHref="/dashboard/organization/info"
+        sectionLabel={activeOrg.name}
       />
+      <div className="flex flex-1 items-start justify-center p-4 pt-0">
+        <OrganizationEdit
+          organization={{
+            id: activeOrg.id,
+            name: activeOrg.name,
+            avatar_emoji: activeOrg.avatar_emoji ?? "🤝",
+            avatar_color: activeOrg.avatar_color ?? "#f2b5b5",
+          }}
+        />
+      </div>
     </div>
   )
 }

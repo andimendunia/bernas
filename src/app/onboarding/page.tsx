@@ -16,6 +16,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { supabase } from "@/lib/supabase/client"
 
 export default function OnboardingPage() {
@@ -28,6 +36,7 @@ export default function OnboardingPage() {
   const [emojiPopoverOpen, setEmojiPopoverOpen] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [successDialogOpen, setSuccessDialogOpen] = React.useState(false)
   const emojiOptions = [
     "🏢",
     "🏛️",
@@ -220,7 +229,7 @@ export default function OnboardingPage() {
 
     // Show success message - request sent and pending approval
     setJoinCode("")
-    alert("Join request sent successfully! An admin needs to approve your request before you can access the organization.")
+    setSuccessDialogOpen(true)
   }
 
   const mode = searchParams.get("mode")
@@ -401,6 +410,22 @@ export default function OnboardingPage() {
           </Card>
         </main>
       </div>
+
+      <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Join Request Sent!</DialogTitle>
+            <DialogDescription>
+              Your request to join the organization has been sent successfully. An admin needs to approve your request before you can access the organization.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setSuccessDialogOpen(false)}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

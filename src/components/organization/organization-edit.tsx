@@ -1,10 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Smile, ArrowLeft } from "lucide-react"
+import { Smile } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -15,7 +14,7 @@ import {
 import { supabase } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
-type OrganizationProfileEditProps = {
+type OrganizationEditProps = {
   organization: {
     id: string
     name: string
@@ -44,9 +43,9 @@ const colorOptions = [
   "#bfd6ea", "#d2c8e8", "#e6c1d9", "#c9d2d6",
 ]
 
-export function OrganizationProfileEdit({
+export function OrganizationEdit({
   organization,
-}: OrganizationProfileEditProps) {
+}: OrganizationEditProps) {
   const router = useRouter()
   const [name, setName] = React.useState(organization.name)
   const [emoji, setEmoji] = React.useState(organization.avatar_emoji)
@@ -75,23 +74,13 @@ export function OrganizationProfileEdit({
     }
 
     toast.success('Organization updated successfully')
-    router.push('/dashboard/organization')
+    router.push('/dashboard/organization/info')
     router.refresh()
   }
 
   return (
     <div className="w-full max-w-2xl">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.back()}
-        className="mb-4"
-      >
-        <ArrowLeft className="size-4 mr-2" />
-        Back
-      </Button>
-
-      <Card className="p-8">
+      <div>
         <h1 className="text-2xl font-semibold">Edit Organization</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Update your organization&apos;s name and appearance
@@ -195,7 +184,7 @@ export function OrganizationProfileEdit({
             </Button>
           </div>
         </form>
-      </Card>
+      </div>
     </div>
   )
 }

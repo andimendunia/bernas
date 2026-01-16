@@ -111,12 +111,8 @@ export function AppSidebar({
 
   const projects = [
     {
-      name: "Organization profile",
-      url: "/dashboard/organization",
-    },
-    {
-      name: "Members",
-      url: "/dashboard/organization/members",
+      name: "Organization info",
+      url: "/dashboard/organization/info",
     },
     ...(isAdmin ? [{
       name: "Administration",
@@ -125,7 +121,7 @@ export function AppSidebar({
   ]
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={organizations} activeOrgId={activeOrgId} />
       </SidebarHeader>
