@@ -4,6 +4,16 @@ import { useRouter } from "next/navigation"
 import { OrganizationInfo } from "./organization-info"
 import { Member } from "@/lib/permissions"
 
+type MemberSkill = {
+  member_id: string
+  tag_id: string
+  tag: {
+    id: string
+    name: string
+    color: string | null
+  }
+}
+
 type OrganizationInfoWrapperProps = {
   organization: {
     id: string
@@ -15,6 +25,7 @@ type OrganizationInfoWrapperProps = {
   }
   canEdit: boolean
   members: Member[]
+  memberSkills: MemberSkill[]
   canChangeRole: boolean
   canRemove: boolean
 }

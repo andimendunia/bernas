@@ -50,6 +50,27 @@ export default async function OrganizationInfoPage() {
   // Get members
   const members = await getOrgMembers(activeOrgId)
 
+  // Get member skills
+  const { data: memberSkillsRaw } = await supabase
+    .from("member_skills")
+    .select(`
+      member_id,
+      tag_id,
+      event_tags (
+        id,
+        name,
+        color
+      )
+    `)
+    .eq("org_id", activeOrgId)
+
+  // Transform member skills
+  const memberSkills = (memberSkillsRaw ?? []).map((ms: any) => ({
+    member_id: ms.member_id,
+    tag_id: ms.tag_id,
+    tag: ms.event_tags?.[0] ?? { id: '', name: '', color: null },
+  }))
+
   // Check permissions
   const { data: canEditData } = await supabase.rpc('has_permission', {
     check_org_id: activeOrgId,
@@ -85,6 +106,7 @@ export default async function OrganizationInfoPage() {
           }}
           canEdit={canEditData === true}
           members={members}
+          memberSkills={memberSkills}
           canChangeRole={canChangeRoleData === true}
           canRemove={canRemoveData === true}
         />

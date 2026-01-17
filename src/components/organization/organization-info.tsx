@@ -36,6 +36,16 @@ import { MemberRoleDialog } from "@/components/members/member-role-dialog"
 import { RemoveMemberDialog } from "@/components/members/remove-member-dialog"
 import { EditOrganizationDialog } from "@/components/organization/edit-organization-dialog"
 
+type MemberSkill = {
+  member_id: string
+  tag_id: string
+  tag: {
+    id: string
+    name: string
+    color: string | null
+  }
+}
+
 type OrganizationInfoProps = {
   organization: {
     id: string
@@ -47,6 +57,7 @@ type OrganizationInfoProps = {
   }
   canEdit: boolean
   members: Member[]
+  memberSkills: MemberSkill[]
   canChangeRole: boolean
   canRemove: boolean
   onMemberUpdated: () => void
@@ -57,6 +68,7 @@ export function OrganizationInfo({
   organization,
   canEdit,
   members,
+  memberSkills,
   canChangeRole,
   canRemove,
   onMemberUpdated,
@@ -141,6 +153,35 @@ export function OrganizationInfo({
           return <Badge variant="secondary">{member.role.name}</Badge>
         }
         return <Badge variant="outline">No role</Badge>
+      },
+    },
+    {
+      accessorKey: "skills",
+      header: "Skills",
+      cell: ({ row }) => {
+        const member = row.original
+        const skills = memberSkills
+          .filter((ms) => ms.member_id === member.id)
+          .map((ms) => ms.tag)
+        
+        if (skills.length === 0) {
+          return <span className="text-sm text-muted-foreground">—</span>
+        }
+
+        return (
+          <div className="flex flex-wrap gap-1">
+            {skills.slice(0, 3).map((skill) => (
+              <Badge key={skill.id} variant="outline" className="text-xs">
+                {skill.name}
+              </Badge>
+            ))}
+            {skills.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{skills.length - 3}
+              </Badge>
+            )}
+          </div>
+        )
       },
     },
     {
