@@ -6,7 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { getOrgMembers } from "@/lib/permissions-server"
 
 export const metadata = {
-  title: "Organization",
+  title: "Organization info",
 }
 
 // Force dynamic rendering

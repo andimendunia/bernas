@@ -29,5 +29,18 @@ export function OrganizationInfoWrapper(props: OrganizationInfoWrapperProps) {
     }, 100)
   }
 
-  return <OrganizationInfo {...props} onMemberUpdated={handleMemberUpdated} />
+  const handleOrganizationUpdated = () => {
+    router.refresh()
+    setTimeout(() => {
+      router.refresh()
+    }, 100)
+  }
+
+  return (
+    <OrganizationInfo
+      {...props}
+      onMemberUpdated={handleMemberUpdated}
+      onOrganizationUpdated={handleOrganizationUpdated}
+    />
+  )
 }

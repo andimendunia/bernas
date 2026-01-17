@@ -2,8 +2,14 @@
 
 import * as React from "react"
 import { Smile } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -14,13 +20,16 @@ import {
 import { supabase } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
-type OrganizationEditProps = {
+type EditOrganizationDialogProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   organization: {
     id: string
     name: string
     avatar_emoji: string
     avatar_color: string
   }
+  onSuccess: () => void
 }
 
 const emojiOptions = [
@@ -43,15 +52,26 @@ const colorOptions = [
   "#bfd6ea", "#d2c8e8", "#e6c1d9", "#c9d2d6",
 ]
 
-export function OrganizationEdit({
+export function EditOrganizationDialog({
+  open,
+  onOpenChange,
   organization,
-}: OrganizationEditProps) {
-  const router = useRouter()
+  onSuccess,
+}: EditOrganizationDialogProps) {
   const [name, setName] = React.useState(organization.name)
   const [emoji, setEmoji] = React.useState(organization.avatar_emoji)
   const [color, setColor] = React.useState(organization.avatar_color)
   const [emojiPopoverOpen, setEmojiPopoverOpen] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
+
+  // Reset form when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      setName(organization.name)
+      setEmoji(organization.avatar_emoji)
+      setColor(organization.avatar_color)
+    }
+  }, [open, organization])
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -74,19 +94,21 @@ export function OrganizationEdit({
     }
 
     toast.success('Organization updated successfully')
-    router.push('/dashboard/organization/info')
-    router.refresh()
+    onSuccess()
+    onOpenChange(false)
   }
 
   return (
-    <div className="w-full max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-semibold">Edit Organization</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Update your organization&apos;s name and appearance
-        </p>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Edit Organization</DialogTitle>
+          <DialogDescription>
+            Update your organization&apos;s name and appearance
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSave} className="mt-8 space-y-6">
+        <form onSubmit={handleSave} className="space-y-6">
           <div className="flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/50 p-4">
             <div
               className="flex size-16 items-center justify-center rounded-2xl text-3xl"
@@ -170,21 +192,21 @@ export function OrganizationEdit({
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save changes"}
-            </Button>
+          <div className="flex gap-3 justify-end">
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.back()}
+              onClick={() => onOpenChange(false)}
               disabled={loading}
             >
               Cancel
             </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save changes"}
+            </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

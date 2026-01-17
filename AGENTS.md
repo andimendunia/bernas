@@ -5,6 +5,8 @@
 - Stack: Next.js App Router + TypeScript + Tailwind + shadcn/ui + Supabase.
 - Primary color: `#df7f80`.
 
+📚 **For feature specifications, business context, and product roadmap, see [FEATURES.md](./FEATURES.md)**
+
 ## Stack & dependencies
 - **Core**: Next.js 16, React 19, TypeScript, Tailwind CSS 4
 - **Backend**: Supabase (Auth, Database, Storage)

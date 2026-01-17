@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Copy, Pencil, MoreHorizontal } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   useReactTable,
@@ -35,6 +34,7 @@ import { Badge } from "@/components/ui/badge"
 import { Member } from "@/lib/permissions"
 import { MemberRoleDialog } from "@/components/members/member-role-dialog"
 import { RemoveMemberDialog } from "@/components/members/remove-member-dialog"
+import { EditOrganizationDialog } from "@/components/organization/edit-organization-dialog"
 
 type OrganizationInfoProps = {
   organization: {
@@ -50,6 +50,7 @@ type OrganizationInfoProps = {
   canChangeRole: boolean
   canRemove: boolean
   onMemberUpdated: () => void
+  onOrganizationUpdated: () => void
 }
 
 export function OrganizationInfo({
@@ -59,13 +60,14 @@ export function OrganizationInfo({
   canChangeRole,
   canRemove,
   onMemberUpdated,
+  onOrganizationUpdated,
 }: OrganizationInfoProps) {
-  const router = useRouter()
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [selectedMember, setSelectedMember] = React.useState<Member | null>(null)
   const [roleDialogOpen, setRoleDialogOpen] = React.useState(false)
   const [removeDialogOpen, setRemoveDialogOpen] = React.useState(false)
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false)
 
   const handleCopyJoinCode = () => {
     navigator.clipboard.writeText(organization.join_code)
@@ -225,7 +227,7 @@ export function OrganizationInfo({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push('/dashboard/organization/info/edit')}
+                onClick={() => setEditDialogOpen(true)}
               >
                 <Pencil className="size-4 mr-2" />
                 Edit
@@ -357,6 +359,13 @@ export function OrganizationInfo({
           />
         </>
       )}
+
+      <EditOrganizationDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        organization={organization}
+        onSuccess={onOrganizationUpdated}
+      />
     </>
   )
 }
