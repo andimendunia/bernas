@@ -69,10 +69,6 @@ const data = {
       icon: Diamond,
       items: [
         {
-          title: "Event tags",
-          url: "/dashboard/events/tags",
-        },
-        {
           title: "Participation",
           url: "/dashboard/participation",
         },
