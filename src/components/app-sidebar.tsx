@@ -118,6 +118,10 @@ export function AppSidebar({
       name: "Skills",
       url: "/dashboard/organization/skills",
     },
+    {
+      name: "Tags",
+      url: "/dashboard/organization/tags",
+    },
     ...(isAdmin ? [{
       name: "Administration",
       url: "/dashboard/organization/administration",
