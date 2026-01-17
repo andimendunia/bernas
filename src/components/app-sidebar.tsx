@@ -7,7 +7,8 @@ import {
   Diamond,
   FolderKanban,
   GalleryVerticalEnd,
-  Link,
+  FileText,
+  Award,
   Users,
 } from "lucide-react"
 
@@ -90,9 +91,9 @@ const data = {
       ],
     },
     {
-      title: "Repository",
-      url: "/dashboard/repository",
-      icon: Link,
+      title: "Resources",
+      url: "/dashboard/resources",
+      icon: FileText,
     },
   ],
 }
@@ -113,6 +114,11 @@ export function AppSidebar({
     {
       name: "Organization info",
       url: "/dashboard/organization/info",
+    },
+    {
+      name: "Skills",
+      url: "/dashboard/organization/skills",
+      icon: Award,
     },
     ...(isAdmin ? [{
       name: "Administration",
