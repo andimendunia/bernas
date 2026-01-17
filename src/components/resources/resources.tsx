@@ -13,6 +13,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import { AddResourceDialog } from "./add-resource-dialog"
+import { AddTagDialog } from "@/components/tags/add-tag-dialog"
 
 type Tag = {
   id: string
@@ -63,6 +65,8 @@ export function Resources({
 }: ResourcesProps) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
+  const [addDialogOpen, setAddDialogOpen] = React.useState(false)
+  const [addTagDialogOpen, setAddTagDialogOpen] = React.useState(false)
 
   // Filter resources
   const filteredResources = resources.filter((resource) => {
@@ -127,8 +131,18 @@ export function Resources({
               <DropdownMenuLabel>Filter by tags</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {tags.length === 0 ? (
-                <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-                  No tags available
+                <div className="px-2 py-4 text-center">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    No tags available
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setAddTagDialogOpen(true)}
+                  >
+                    <Plus className="size-3 mr-1" />
+                    Create Tag
+                  </Button>
                 </div>
               ) : (
                 tags.map((tag) => (
@@ -158,7 +172,7 @@ export function Resources({
         </div>
 
         {canCreate && (
-          <Button>
+          <Button onClick={() => setAddDialogOpen(true)}>
             <Plus className="size-4 mr-2" />
             Add Resource
           </Button>
@@ -276,6 +290,23 @@ export function Resources({
           {resources.length === 1 ? "resource" : "resources"}
         </div>
       )}
+
+      {/* Add Resource Dialog */}
+      <AddResourceDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        organizationId={organizationId}
+        tags={tags}
+        onSuccess={onResourceUpdated}
+      />
+
+      {/* Add Tag Dialog */}
+      <AddTagDialog
+        open={addTagDialogOpen}
+        onOpenChange={setAddTagDialogOpen}
+        organizationId={organizationId}
+        onSuccess={onResourceUpdated}
+      />
     </div>
   )
 }
