@@ -77,10 +77,12 @@ export default async function ResourcesPage() {
   // Transform the data to match expected type
   const resources = (resourcesRaw ?? []).map((resource: any) => ({
     ...resource,
-    resource_tag_links: (resource.resource_tag_links ?? []).map((link: any) => ({
-      tag_id: link.tag_id,
-      event_tags: link.event_tags?.[0] ?? { id: '', name: '', color: null },
-    })),
+    resource_tag_links: (resource.resource_tag_links ?? [])
+      .filter((link: any) => link.event_tags) // Only keep links with valid tags
+      .map((link: any) => ({
+        tag_id: link.tag_id,
+        event_tags: link.event_tags,
+      })),
   }))
 
   // Get all tags for filters
