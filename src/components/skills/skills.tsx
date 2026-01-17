@@ -8,17 +8,18 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Users } from "lucide-react"
 import { Member } from "@/lib/permissions"
 
-type Tag = {
+type Skill = {
   id: string
   name: string
+  description: string | null
   color: string | null
 }
 
 type MemberSkill = {
   id: string
   member_id: string
-  tag_id: string
-  event_tags: Tag
+  skill_id: string
+  skills: Skill
   org_members: {
     id: string
     user_id: string
@@ -28,7 +29,7 @@ type MemberSkill = {
 
 type SkillsProps = {
   organizationId: string
-  tags: Tag[]
+  skills: Skill[]
   memberSkills: MemberSkill[]
   members: Member[]
   currentMemberId?: string
@@ -41,7 +42,7 @@ type SkillsProps = {
 
 export function Skills({
   organizationId,
-  tags,
+  skills,
   memberSkills,
   members,
   currentMemberId,
@@ -55,28 +56,28 @@ export function Skills({
 
   // Group skills with their members
   const skillsWithMembers = React.useMemo(() => {
-    const skillMap = new Map<string, { tag: Tag; memberIds: string[] }>()
+    const skillMap = new Map<string, { skill: Skill; memberIds: string[] }>()
 
-    // Initialize all tags as skills (even if no one has them yet)
-    tags.forEach((tag) => {
-      skillMap.set(tag.id, { tag, memberIds: [] })
+    // Initialize all skills (even if no one has them yet)
+    skills.forEach((skill) => {
+      skillMap.set(skill.id, { skill, memberIds: [] })
     })
 
     // Add members who have each skill
     memberSkills.forEach((ms) => {
-      const existing = skillMap.get(ms.tag_id)
+      const existing = skillMap.get(ms.skill_id)
       if (existing && !existing.memberIds.includes(ms.member_id)) {
         existing.memberIds.push(ms.member_id)
       }
     })
 
     return Array.from(skillMap.values())
-  }, [tags, memberSkills])
+  }, [skills, memberSkills])
 
   // Filter skills
   const filteredSkills = skillsWithMembers.filter((skill) =>
     searchQuery === "" ||
-    skill.tag.name.toLowerCase().includes(searchQuery.toLowerCase())
+    skill.skill.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const getUserName = (member: Member) => {
@@ -123,7 +124,7 @@ export function Skills({
             <p className="text-sm text-muted-foreground">
               {searchQuery
                 ? "No skills match your search"
-                : "No skills yet. Create tags to use as skills."}
+                : "No skills yet. Create your first skill to get started."}
             </p>
           </div>
         ) : (
@@ -136,14 +137,14 @@ export function Skills({
 
             return (
               <div
-                key={skill.tag.id}
+                key={skill.skill.id}
                 className="group rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex flex-1 items-center gap-4">
                     <div className="flex items-center gap-3">
                       <Badge variant="secondary" className="text-base">
-                        {skill.tag.name}
+                        {skill.skill.name}
                       </Badge>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Users className="size-4" />

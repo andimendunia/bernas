@@ -8,7 +8,6 @@ import {
   FolderKanban,
   GalleryVerticalEnd,
   FileText,
-  Award,
   Users,
 } from "lucide-react"
 
@@ -118,7 +117,6 @@ export function AppSidebar({
     {
       name: "Skills",
       url: "/dashboard/organization/skills",
-      icon: Award,
     },
     ...(isAdmin ? [{
       name: "Administration",

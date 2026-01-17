@@ -38,10 +38,11 @@ import { EditOrganizationDialog } from "@/components/organization/edit-organizat
 
 type MemberSkill = {
   member_id: string
-  tag_id: string
-  tag: {
+  skill_id: string
+  skill: {
     id: string
     name: string
+    description: string | null
     color: string | null
   }
 }
@@ -162,7 +163,7 @@ export function OrganizationInfo({
         const member = row.original
         const skills = memberSkills
           .filter((ms) => ms.member_id === member.id)
-          .map((ms) => ms.tag)
+          .map((ms) => ms.skill)
         
         if (skills.length === 0) {
           return <span className="text-sm text-muted-foreground">—</span>

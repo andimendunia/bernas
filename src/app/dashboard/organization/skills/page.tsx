@@ -48,10 +48,10 @@ export default async function SkillsPage() {
     redirect("/onboarding")
   }
 
-  // Get all tags (used as skills)
-  const { data: tags } = await supabase
-    .from("event_tags")
-    .select("id, name, color")
+  // Get all skills
+  const { data: skills } = await supabase
+    .from("skills")
+    .select("id, name, description, color")
     .eq("org_id", activeOrgId)
     .order("name")
 
@@ -61,10 +61,11 @@ export default async function SkillsPage() {
     .select(`
       id,
       member_id,
-      tag_id,
-      event_tags (
+      skill_id,
+      skills (
         id,
         name,
+        description,
         color
       ),
       org_members (
@@ -78,7 +79,7 @@ export default async function SkillsPage() {
   // Transform the data to match expected type
   const memberSkills = (memberSkillsRaw ?? []).map((ms: any) => ({
     ...ms,
-    event_tags: ms.event_tags?.[0] ?? { id: '', name: '', color: null },
+    skills: ms.skills?.[0] ?? { id: '', name: '', description: null, color: null },
     org_members: ms.org_members?.[0] ?? { id: '', user_id: '', is_admin: false },
   }))
 
@@ -119,7 +120,7 @@ export default async function SkillsPage() {
       <div className="flex flex-1 items-start justify-center p-4 pt-0">
         <SkillsWrapper
           organizationId={activeOrgId}
-          tags={tags ?? []}
+          skills={skills ?? []}
           memberSkills={memberSkills}
           members={members}
           currentMemberId={currentMember?.id}

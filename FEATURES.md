@@ -33,12 +33,22 @@ Work items within events that can be assigned to specific members.
 - Future: May suggest assignees based on member skills
 
 ### Tags
-Universal categorization system used across the platform.
+Categorization system for events and resources.
 
-- Applied to events (e.g., "Fundraising", "Bi-monthly Discussion")
-- Applied to resources (same tags as events)
-- Applied to members as skills (same tag pool)
-- Enables cross-feature filtering and discovery
+- **Format**: UPPERCASE, no spaces (e.g., "FUNDRAISING", "PODCAST", "BI-MONTHLY-DISCUSSION")
+- Applied to events for categorization
+- Applied to resources for organization
+- Enables filtering and discovery across events and resources
+
+### Skills
+Capability tracking system for matching people to work.
+
+- **Format**: lowercase, no spaces, can use hyphens (e.g., "audio-editing", "script-writing", "grant-writing")
+- **Separate from tags**: Skills are NOT the same as tags
+- Applied to members (who has this skill)
+- Applied to events (this event needs these skills)
+- Applied to tasks (this task needs these skills)
+- Helps identify who can help with specific work
 
 ### Participation
 Members declare their availability/intent to participate in events.
@@ -130,24 +140,28 @@ Members declare their availability/intent to participate in events.
 ### 🚧 Skills System
 **Problem Solved**: Organizational roles don't reflect practical reality. Members have multiple competencies (e.g., Secretary + Merch + Podcast editing) but no way to document or discover "who can do what."
 
-**Solution**: Skill tagging system that documents member competencies and responsibility areas.
+**Solution**: Skill system that documents member competencies and matches people to work.
 
 **Specifications:**
-- **Universal Tags**: Skills use the same tag pool as events/resources
-  - If "Podcast" tag exists, it can be:
-    - Applied to an event (Podcast event)
-    - Applied to a resource (Podcast-related doc)
-    - Applied to a member (has Podcast skills)
+- **Separate from Tags**: Skills are independent entities (NOT the same as event/resource tags)
+- **Naming Convention**: lowercase, no spaces, can use hyphens (e.g., "audio-editing", "grant-writing")
+- **Self-Service Creation**: Anyone can create new skills organization-wide
 - **Self-Assignment**: Members can assign/remove skills for themselves
+- **Skill Attachments**:
+  - **Members**: Who has this skill
+  - **Events**: This event needs these skills (helps find who can help)
+  - **Tasks**: This task needs these skills (suggests assignees)
 - **Permissions (Default Role)**:
-  - Create new skill tags: ✅
+  - Create skills: ✅ (everyone)
   - Assign skills to self: ✅
   - Remove skills from self: ✅
-  - Assign/remove skills for others: ❌ (admin only)
+  - Edit/delete skills: ❌ (requires permission)
+  - Assign/remove skills for others: ❌ (requires permission)
 - **Discovery**: 
   - Dedicated Skills page showing all skills with member avatars
   - Skills visible on member profiles
   - Skills shown in members table (badge list)
+  - Event/task pages show required skills and who has them
 
 **UI Location**: 
 - Sidebar → Organization → Skills (new page)
@@ -203,20 +217,31 @@ Members declare their availability/intent to participate in events.
 ## Feature Relationships
 
 ```
-Tags (Universal)
+Tags (UPPERCASE)
 ├── Applied to Events
-├── Applied to Resources
-└── Applied to Members (as Skills)
+└── Applied to Resources
+
+Skills (lowercase)
+├── Applied to Members (who has this skill)
+├── Applied to Events (event needs these skills)
+└── Applied to Tasks (task needs these skills)
 
 Events
 ├── Contains Tasks
 ├── Has Resources attached (many-to-many)
+├── Has Skills required (many-to-many)
 ├── Tracks Participation
 └── Tagged with Tags
 
+Tasks
+├── Belongs to Event
+├── Has Skills required (many-to-many)
+├── Assigned to Members
+└── Has status and deadline
+
 Members
 ├── Have Roles → Have Permissions
-├── Have Skills (Tags)
+├── Have Skills (many-to-many)
 ├── Participate in Events
 ├── Assigned to Tasks
 └── Create Resources
@@ -263,7 +288,10 @@ See [PATTERNS.md](./PATTERNS.md) for detailed code patterns and examples.
 1. **Flexible Over Rigid**: Support how organizations actually work, not how org charts say they work
 2. **Transparency**: Everyone sees what's happening (unless permissions explicitly restrict)
 3. **Low Barrier**: Easy to add information (resources, skills, events) without formal processes
-4. **Multi-Use Tags**: One tagging system for everything reduces cognitive load
+4. **Clear Naming Conventions**: 
+   - Tags: UPPERCASE (for categorization)
+   - Skills: lowercase (for capabilities)
+   - Reduces confusion and improves scanability
 5. **Permission-Aware**: Features adapt based on what users can do, but remain discoverable
 
 ---

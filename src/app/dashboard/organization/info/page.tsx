@@ -55,10 +55,11 @@ export default async function OrganizationInfoPage() {
     .from("member_skills")
     .select(`
       member_id,
-      tag_id,
-      event_tags (
+      skill_id,
+      skills (
         id,
         name,
+        description,
         color
       )
     `)
@@ -67,8 +68,8 @@ export default async function OrganizationInfoPage() {
   // Transform member skills
   const memberSkills = (memberSkillsRaw ?? []).map((ms: any) => ({
     member_id: ms.member_id,
-    tag_id: ms.tag_id,
-    tag: ms.event_tags?.[0] ?? { id: '', name: '', color: null },
+    skill_id: ms.skill_id,
+    skill: ms.skills?.[0] ?? { id: '', name: '', description: null, color: null },
   }))
 
   // Check permissions

@@ -6,10 +6,11 @@ import { Member } from "@/lib/permissions"
 
 type MemberSkill = {
   member_id: string
-  tag_id: string
-  tag: {
+  skill_id: string
+  skill: {
     id: string
     name: string
+    description: string | null
     color: string | null
   }
 }

@@ -50,6 +50,8 @@
 7. `20260116192146_fix_set_updated_at_search_path.sql` - Security fix for set_updated_at trigger
 8. `20260116192457_fix_rls_performance.sql` - RLS performance optimization (auth.uid wrapping)
 9. `20260116200052_fix_approve_join_request_onboarding.sql` - Fix onboarding metadata on join approval
+10. `20260118000000_resources_and_skills.sql` - Resources tags and initial skills (DEPRECATED - skills were tags)
+11. `20260118000001_separate_skills_from_tags.sql` - Skills system (separate from tags)
 
 **Key Tables:**
 - `organizations` - Organization data with join codes and avatars
@@ -58,7 +60,13 @@
 - `permissions` - System-wide permissions (read-only, predefined)
 - `role_permissions` - Many-to-many role-permission mappings
 - `join_requests` - Organization join request workflow
-- `events`, `tasks`, `tags`, `participation`, `resources` - Core feature tables
+- `events`, `tasks`, `participation` - Event and task management
+- `event_tags` - UPPERCASE tags for categorizing events/resources
+- `resources` - Resource library with URLs/files
+- `skills` - lowercase skills (separate from tags)
+- `member_skills` - Member skill assignments
+- `event_skill_links` - Skills required for events
+- `task_skill_links` - Skills required for tasks
 
 **RLS:**
 - Member-based access via `is_org_member(org_id)` helper

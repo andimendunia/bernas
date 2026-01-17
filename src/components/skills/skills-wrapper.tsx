@@ -4,17 +4,18 @@ import { useRouter } from "next/navigation"
 import { Skills } from "./skills"
 import { Member } from "@/lib/permissions"
 
-type Tag = {
+type Skill = {
   id: string
   name: string
+  description: string | null
   color: string | null
 }
 
 type MemberSkill = {
   id: string
   member_id: string
-  tag_id: string
-  event_tags: Tag
+  skill_id: string
+  skills: Skill
   org_members: {
     id: string
     user_id: string
@@ -24,7 +25,7 @@ type MemberSkill = {
 
 type SkillsWrapperProps = {
   organizationId: string
-  tags: Tag[]
+  skills: Skill[]
   memberSkills: MemberSkill[]
   members: Member[]
   currentMemberId?: string
