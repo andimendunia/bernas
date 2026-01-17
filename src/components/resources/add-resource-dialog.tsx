@@ -66,6 +66,14 @@ export function AddResourceDialog({
     e.preventDefault()
     setLoading(true)
 
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setLoading(false)
+      toast.error('You must be logged in to create resources')
+      return
+    }
+
     // Insert resource
     const { data: resource, error: resourceError } = await supabase
       .from('resources')
@@ -75,6 +83,7 @@ export function AddResourceDialog({
         description: description.trim() || null,
         type: 'link',
         url: url.trim(),
+        created_by: user.id,
       })
       .select()
       .single()
