@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Users } from "lucide-react"
 import { Member } from "@/lib/permissions"
+import { AddSkillDialog } from "./add-skill-dialog"
 
 type Skill = {
   id: string
@@ -53,6 +54,7 @@ export function Skills({
   onSkillsUpdated,
 }: SkillsProps) {
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [addDialogOpen, setAddDialogOpen] = React.useState(false)
 
   // Group skills with their members
   const skillsWithMembers = React.useMemo(() => {
@@ -100,7 +102,7 @@ export function Skills({
 
   return (
     <div className="w-full max-w-5xl space-y-6">
-      {/* Header with search */}
+      {/* Header with search and create button */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -112,8 +114,14 @@ export function Skills({
           />
         </div>
 
-        <div className="text-sm text-muted-foreground">
-          {filteredSkills.length} {filteredSkills.length === 1 ? "skill" : "skills"}
+        <div className="flex items-center gap-3">
+          <div className="text-sm text-muted-foreground">
+            {filteredSkills.length} {filteredSkills.length === 1 ? "skill" : "skills"}
+          </div>
+          <Button onClick={() => setAddDialogOpen(true)}>
+            <Plus className="size-4 mr-2" />
+            Create Skill
+          </Button>
         </div>
       </div>
 
@@ -205,6 +213,14 @@ export function Skills({
           })
         )}
       </div>
+
+      {/* Add Skill Dialog */}
+      <AddSkillDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        organizationId={organizationId}
+        onSuccess={onSkillsUpdated}
+      />
     </div>
   )
 }
