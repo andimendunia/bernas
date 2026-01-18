@@ -65,12 +65,14 @@ export default async function OrganizationInfoPage() {
     `)
     .eq("org_id", activeOrgId)
 
-  // Transform member skills
-  const memberSkills = (memberSkillsRaw ?? []).map((ms: any) => ({
-    member_id: ms.member_id,
-    skill_id: ms.skill_id,
-    skill: ms.skills?.[0] ?? { id: '', name: '', description: null, color: null },
-  }))
+  // Transform member skills (filter out invalid skills)
+  const memberSkills = (memberSkillsRaw ?? [])
+    .filter((ms: any) => ms.skills?.[0]?.id && ms.skills?.[0]?.name)
+    .map((ms: any) => ({
+      member_id: ms.member_id,
+      skill_id: ms.skill_id,
+      skill: ms.skills[0],
+    }))
 
   // Check permissions
   const { data: canEditData } = await supabase.rpc('has_permission', {

@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Filter, X, Diamond, MoreVertical, FileText, Sparkles } from "lucide-react"
+import { Plus, Search, Filter, X, Diamond, MoreVertical, FileText } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -244,6 +244,10 @@ export function Events({
               .map((link) => link.event_tags)
               .filter(Boolean)
 
+            const eventSkills = skills.filter((skill) => 
+              event.skill_ids.includes(skill.id)
+            )
+
             const startDate = event.metadata.start_date
             const endDate = event.metadata.end_date
 
@@ -296,13 +300,14 @@ export function Events({
                           </div>
                         </>
                       )}
-                      {event.skill_ids.length > 0 && (
+                      {eventSkills.length > 0 && (
                         <>
                           <span className="text-muted-foreground">•</span>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Sparkles className="size-4" />
-                            <span>{event.skill_ids.length}</span>
-                          </div>
+                          {eventSkills.map((skill) => (
+                            <Badge key={skill.id} variant="secondary">
+                              {skill.name}
+                            </Badge>
+                          ))}
                         </>
                       )}
                     </div>
