@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Plus, ExternalLink, Search, Filter, X } from "lucide-react"
+import { Plus, ExternalLink, Search, Filter, X, MoreVertical } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +12,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { AddResourceDialog } from "./add-resource-dialog"
+import { EditResourceDialog } from "./edit-resource-dialog"
+import { DeleteResourceDialog } from "./delete-resource-dialog"
 
 type Tag = {
   id: string
@@ -65,6 +68,9 @@ export function Resources({
   const [searchQuery, setSearchQuery] = React.useState("")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
   const [addDialogOpen, setAddDialogOpen] = React.useState(false)
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
+  const [selectedResource, setSelectedResource] = React.useState<Resource | null>(null)
 
   // Filter resources
   const filteredResources = resources.filter((resource) => {
@@ -265,6 +271,38 @@ export function Resources({
                         </a>
                       </Button>
                     )}
+                    {(canEdit || canDelete) && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {canEdit && (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedResource(resource)
+                                setEditDialogOpen(true)
+                              }}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                          )}
+                          {canDelete && (
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => {
+                                setSelectedResource(resource)
+                                setDeleteDialogOpen(true)
+                              }}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 </div>
               </div>
@@ -287,6 +325,25 @@ export function Resources({
         onOpenChange={setAddDialogOpen}
         organizationId={organizationId}
         tags={tags}
+        onSuccess={onResourceUpdated}
+      />
+
+      {/* Edit Resource Dialog */}
+      <EditResourceDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        organizationId={organizationId}
+        resource={selectedResource}
+        tags={tags}
+        onSuccess={onResourceUpdated}
+      />
+
+      {/* Delete Resource Dialog */}
+      <DeleteResourceDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        resourceId={selectedResource?.id ?? null}
+        resourceTitle={selectedResource?.title ?? null}
         onSuccess={onResourceUpdated}
       />
     </div>
