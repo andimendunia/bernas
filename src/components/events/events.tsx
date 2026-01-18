@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Filter, X, Diamond, MoreVertical } from "lucide-react"
+import { Plus, Search, Filter, X, Diamond, MoreVertical, FileText, Sparkles } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,8 @@ import {
 import { AddEventDialog } from "./add-event-dialog"
 import { EditEventDialog } from "./edit-event-dialog"
 import { DeleteEventDialog } from "./delete-event-dialog"
+import { ManageEventResourcesDialog } from "./manage-event-resources-dialog"
+import { ManageEventSkillsDialog } from "./manage-event-skills-dialog"
 
 type Tag = {
   id: string
@@ -27,6 +29,17 @@ type Tag = {
 type EventTagLink = {
   tag_id: string
   event_tags: Tag
+}
+
+type Resource = {
+  id: string
+  title: string
+  url: string | null
+}
+
+type Skill = {
+  id: string
+  name: string
 }
 
 type Event = {
@@ -40,12 +53,16 @@ type Event = {
   created_at: string
   created_by: string
   event_tag_links: EventTagLink[]
+  resource_link_ids: string[]
+  skill_ids: string[]
 }
 
 type EventsProps = {
   organizationId: string
   events: Event[]
   tags: Tag[]
+  resources: Resource[]
+  skills: Skill[]
   canCreate: boolean
   canEdit: boolean
   canDelete: boolean
@@ -70,6 +87,8 @@ export function Events({
   organizationId,
   events,
   tags,
+  resources,
+  skills,
   canCreate,
   canEdit,
   canDelete,
@@ -80,6 +99,8 @@ export function Events({
   const [addDialogOpen, setAddDialogOpen] = React.useState(false)
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
+  const [manageResourcesDialogOpen, setManageResourcesDialogOpen] = React.useState(false)
+  const [manageSkillsDialogOpen, setManageSkillsDialogOpen] = React.useState(false)
   const [selectedEvent, setSelectedEvent] = React.useState<Event | null>(null)
 
   // Filter events
@@ -266,6 +287,24 @@ export function Events({
                           ))}
                         </>
                       )}
+                      {event.resource_link_ids.length > 0 && (
+                        <>
+                          <span className="text-muted-foreground">•</span>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <FileText className="size-4" />
+                            <span>{event.resource_link_ids.length}</span>
+                          </div>
+                        </>
+                      )}
+                      {event.skill_ids.length > 0 && (
+                        <>
+                          <span className="text-muted-foreground">•</span>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Sparkles className="size-4" />
+                            <span>{event.skill_ids.length}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -279,14 +318,33 @@ export function Events({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {canEdit && (
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedEvent(event)
-                                setEditDialogOpen(true)
-                              }}
-                            >
-                              Edit
-                            </DropdownMenuItem>
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedEvent(event)
+                                  setEditDialogOpen(true)
+                                }}
+                              >
+                                Edit Event
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedEvent(event)
+                                  setManageResourcesDialogOpen(true)
+                                }}
+                              >
+                                Manage Resources
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedEvent(event)
+                                  setManageSkillsDialogOpen(true)
+                                }}
+                              >
+                                Manage Skills
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                            </>
                           )}
                           {canDelete && (
                             <DropdownMenuItem
@@ -296,7 +354,7 @@ export function Events({
                                 setDeleteDialogOpen(true)
                               }}
                             >
-                              Hapus
+                              Delete
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -335,6 +393,30 @@ export function Events({
         onOpenChange={setDeleteDialogOpen}
         eventId={selectedEvent?.id ?? null}
         eventName={selectedEvent?.name ?? null}
+        onSuccess={onEventsUpdated}
+      />
+
+      {/* Manage Event Resources Dialog */}
+      <ManageEventResourcesDialog
+        open={manageResourcesDialogOpen}
+        onOpenChange={setManageResourcesDialogOpen}
+        organizationId={organizationId}
+        eventId={selectedEvent?.id ?? null}
+        eventName={selectedEvent?.name ?? null}
+        resources={resources}
+        attachedResourceIds={selectedEvent?.resource_link_ids ?? []}
+        onSuccess={onEventsUpdated}
+      />
+
+      {/* Manage Event Skills Dialog */}
+      <ManageEventSkillsDialog
+        open={manageSkillsDialogOpen}
+        onOpenChange={setManageSkillsDialogOpen}
+        organizationId={organizationId}
+        eventId={selectedEvent?.id ?? null}
+        eventName={selectedEvent?.name ?? null}
+        skills={skills}
+        requiredSkillIds={selectedEvent?.skill_ids ?? []}
         onSuccess={onEventsUpdated}
       />
     </div>

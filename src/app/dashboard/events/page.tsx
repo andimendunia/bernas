@@ -47,7 +47,7 @@ export default async function EventsPage() {
     redirect("/onboarding")
   }
 
-  // Get events with tags
+  // Get events with tags, resources, and skills
   const { data: eventsRaw } = await supabase
     .from("events")
     .select(`
@@ -69,6 +69,19 @@ export default async function EventsPage() {
     .eq("org_id", activeOrgId)
     .order("created_at", { ascending: false })
 
+  // Get resource links for events
+  const { data: resourceLinksRaw } = await supabase
+    .from("resource_links")
+    .select("linked_id, resource_id")
+    .eq("org_id", activeOrgId)
+    .eq("linked_type", "event")
+
+  // Get event skill links
+  const { data: eventSkillLinksRaw } = await supabase
+    .from("event_skill_links")
+    .select("event_id, skill_id")
+    .eq("org_id", activeOrgId)
+
   // Transform the data to match expected type
   const events = (eventsRaw ?? []).map((event: any) => ({
     ...event,
@@ -78,12 +91,32 @@ export default async function EventsPage() {
         tag_id: link.tag_id,
         event_tags: link.event_tags,
       })),
+    resource_link_ids: (resourceLinksRaw ?? [])
+      .filter((link: any) => link.linked_id === event.id)
+      .map((link: any) => link.resource_id),
+    skill_ids: (eventSkillLinksRaw ?? [])
+      .filter((link: any) => link.event_id === event.id)
+      .map((link: any) => link.skill_id),
   }))
 
   // Get all tags for filters
   const { data: tags } = await supabase
     .from("event_tags")
     .select("id, name, color")
+    .eq("org_id", activeOrgId)
+    .order("name")
+
+  // Get all resources
+  const { data: resources } = await supabase
+    .from("resources")
+    .select("id, title, url")
+    .eq("org_id", activeOrgId)
+    .order("title")
+
+  // Get all skills
+  const { data: skills } = await supabase
+    .from("skills")
+    .select("id, name")
     .eq("org_id", activeOrgId)
     .order("name")
 
@@ -115,6 +148,8 @@ export default async function EventsPage() {
           organizationId={activeOrgId}
           events={events}
           tags={tags ?? []}
+          resources={resources ?? []}
+          skills={skills ?? []}
           canCreate={canCreateData === true}
           canEdit={canEditData === true}
           canDelete={canDeleteData === true}
