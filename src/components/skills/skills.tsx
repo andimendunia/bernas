@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Users } from "lucide-react"
 import { Member } from "@/lib/permissions"
 import { AddSkillDialog } from "./add-skill-dialog"
+import { ManageSkillMembersDialog } from "./manage-skill-members-dialog"
 import { supabase } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
@@ -57,6 +58,8 @@ export function Skills({
 }: SkillsProps) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [addDialogOpen, setAddDialogOpen] = React.useState(false)
+  const [manageDialogOpen, setManageDialogOpen] = React.useState(false)
+  const [selectedSkill, setSelectedSkill] = React.useState<{ id: string; name: string; memberIds: string[] } | null>(null)
   const [loadingSkills, setLoadingSkills] = React.useState<Set<string>>(new Set())
 
   const handleToggleSkill = async (skillId: string, currentlyHas: boolean) => {
@@ -251,7 +254,24 @@ export function Skills({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {canAssignSelf && currentMemberId && (
+                    {canAssignOthers && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="opacity-0 transition-opacity group-hover:opacity-100"
+                        onClick={() => {
+                          setSelectedSkill({
+                            id: skill.skill.id,
+                            name: skill.skill.name,
+                            memberIds: skill.memberIds,
+                          })
+                          setManageDialogOpen(true)
+                        }}
+                      >
+                        Manage
+                      </Button>
+                    )}
+                    {canAssignSelf && currentMemberId && !canAssignOthers && (
                       <Button
                         variant={skill.memberIds.includes(currentMemberId) ? "outline" : "ghost"}
                         size="sm"
@@ -283,6 +303,17 @@ export function Skills({
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         organizationId={organizationId}
+        onSuccess={onSkillsUpdated}
+      />
+
+      {/* Manage Skill Members Dialog */}
+      <ManageSkillMembersDialog
+        open={manageDialogOpen}
+        onOpenChange={setManageDialogOpen}
+        organizationId={organizationId}
+        skill={selectedSkill ? { id: selectedSkill.id, name: selectedSkill.name } : null}
+        members={members}
+        memberIdsWithSkill={selectedSkill?.memberIds ?? []}
         onSuccess={onSkillsUpdated}
       />
     </div>
