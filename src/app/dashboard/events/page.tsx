@@ -5,7 +5,7 @@ import { EventsWrapper } from "@/components/events/events-wrapper"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export const metadata = {
-  title: "Acara",
+  title: "Events",
 }
 
 // Force dynamic rendering
@@ -106,7 +106,7 @@ export default async function EventsPage() {
   return (
     <div className="flex flex-1 flex-col">
       <DashboardHeader
-        title="Acara"
+        title="Events"
         sectionHref="/dashboard/events"
         sectionLabel={activeOrg.name}
       />

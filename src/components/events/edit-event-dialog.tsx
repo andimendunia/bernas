@@ -88,7 +88,7 @@ export function EditEventDialog({
     // Validate dates
     if (endDate && new Date(endDate) < new Date(startDate)) {
       setLoading(false)
-      toast.error('Tanggal berakhir harus setelah tanggal mulai')
+      toast.error('End date must be after start date')
       return
     }
 
@@ -107,7 +107,7 @@ export function EditEventDialog({
 
     if (eventError) {
       setLoading(false)
-      toast.error('Gagal memperbarui acara')
+      toast.error('Failed to update event')
       console.error(eventError)
       return
     }
@@ -137,7 +137,7 @@ export function EditEventDialog({
     }
 
     setLoading(false)
-    toast.success('Acara berhasil diperbarui')
+    toast.success('Event updated successfully')
     onSuccess()
     onOpenChange(false)
   }
@@ -148,34 +148,34 @@ export function EditEventDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Acara</DialogTitle>
+          <DialogTitle>Edit Event</DialogTitle>
           <DialogDescription>
-            Perbarui informasi acara.
+            Update event information.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="event-name">
-              Nama Acara <span className="text-destructive">*</span>
+              Event Name <span className="text-destructive">*</span>
             </Label>
             <Input
               id="event-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="contoh: Diskusi Dwi-Bulanan: Identitas"
+              placeholder="e.g., Bi-monthly Discussion: Identity"
               required
               autoFocus
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="event-description">Deskripsi (opsional)</Label>
+            <Label htmlFor="event-description">Description (optional)</Label>
             <Textarea
               id="event-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Deskripsi singkat tentang acara ini"
+              placeholder="Brief description of this event"
               rows={4}
             />
           </div>
@@ -183,7 +183,7 @@ export function EditEventDialog({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="start-date">
-                Tanggal Mulai <span className="text-destructive">*</span>
+                Start Date <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="start-date"
@@ -195,7 +195,7 @@ export function EditEventDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="end-date">Tanggal Berakhir (opsional)</Label>
+              <Label htmlFor="end-date">End Date (optional)</Label>
               <Input
                 id="end-date"
                 type="date"
@@ -204,16 +204,16 @@ export function EditEventDialog({
                 min={startDate}
               />
               <p className="text-xs text-muted-foreground">
-                Kosongkan jika acara satu hari
+                Leave empty for single-day events
               </p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Tag (opsional)</Label>
+            <Label>Tags (optional)</Label>
             {tags.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Tidak ada tag tersedia.
+                No tags available.
               </p>
             ) : (
               <>
@@ -233,7 +233,7 @@ export function EditEventDialog({
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Klik tag untuk menambah/menghapusnya.
+                  Click tags to add/remove them.
                 </p>
               </>
             )}
@@ -246,10 +246,10 @@ export function EditEventDialog({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Batal
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Menyimpan..." : "Simpan Perubahan"}
+              {loading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

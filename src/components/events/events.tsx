@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Filter, X, Calendar, MoreVertical } from "lucide-react"
+import { Plus, Search, Filter, X, Diamond, MoreVertical } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -123,7 +123,7 @@ export function Events({
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Cari acara..."
+              placeholder="Search events..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -142,12 +142,12 @@ export function Events({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Filter berdasarkan tag</DropdownMenuLabel>
+              <DropdownMenuLabel>Filter by tags</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {tags.length === 0 ? (
                 <div className="px-2 py-4 text-center">
                   <p className="text-sm text-muted-foreground">
-                    Tidak ada tag tersedia
+                    No tags available
                   </p>
                 </div>
               ) : (
@@ -172,7 +172,7 @@ export function Events({
               className="h-9"
             >
               <X className="size-4 mr-1" />
-              Hapus
+              Clear
             </Button>
           )}
         </div>
@@ -180,7 +180,7 @@ export function Events({
         {canCreate && (
           <Button onClick={() => setAddDialogOpen(true)}>
             <Plus className="size-4 mr-2" />
-            Buat Acara
+            Create Event
           </Button>
         )}
       </div>
@@ -188,7 +188,7 @@ export function Events({
       {/* Active filters display */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          <span className="text-sm text-muted-foreground">Difilter berdasarkan:</span>
+          <span className="text-sm text-muted-foreground">Filtered by:</span>
           {selectedTags.map((tagId) => {
             const tag = tags.find((t) => t.id === tagId)
             if (!tag) return null
@@ -213,8 +213,8 @@ export function Events({
           <div className="rounded-lg border border-dashed p-12 text-center">
             <p className="text-sm text-muted-foreground">
               {hasActiveFilters
-                ? "Tidak ada acara yang cocok dengan pencarian Anda"
-                : "Belum ada acara. Buat acara pertama Anda untuk memulai."}
+                ? "No events match your search"
+                : "No events yet. Create your first event to get started."}
             </p>
           </div>
         ) : (
@@ -234,7 +234,7 @@ export function Events({
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-start gap-3">
-                      <Calendar className="size-5 mt-0.5 text-muted-foreground flex-shrink-0" />
+                      <Diamond className="size-5 mt-0.5 text-muted-foreground flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium leading-none">
                           {event.name}

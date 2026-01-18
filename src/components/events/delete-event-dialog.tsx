@@ -43,12 +43,12 @@ export function DeleteEventDialog({
     setLoading(false)
 
     if (error) {
-      toast.error('Gagal menghapus acara')
+      toast.error('Failed to delete event')
       console.error(error)
       return
     }
 
-    toast.success('Acara berhasil dihapus')
+    toast.success('Event deleted successfully')
     onSuccess()
     onOpenChange(false)
   }
@@ -57,10 +57,10 @@ export function DeleteEventDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Hapus Acara?</AlertDialogTitle>
+          <AlertDialogTitle>Delete Event?</AlertDialogTitle>
           <AlertDialogDescription>
-            Apakah Anda yakin ingin menghapus acara <strong>{eventName}</strong>?
-            Tindakan ini tidak dapat dibatalkan.
+            Are you sure you want to delete the event <strong>{eventName}</strong>?
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -69,14 +69,14 @@ export function DeleteEventDialog({
             onClick={() => onOpenChange(false)}
             disabled={loading}
           >
-            Batal
+            Cancel
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={loading}
           >
-            {loading ? "Menghapus..." : "Hapus Acara"}
+            {loading ? "Deleting..." : "Delete Event"}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
