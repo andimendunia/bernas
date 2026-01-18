@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Users } from "lucide-react"
 import { Member } from "@/lib/permissions"
 import { AddSkillDialog } from "./add-skill-dialog"
+import { supabase } from "@/lib/supabase/client"
+import { toast } from "sonner"
 
 type Skill = {
   id: string
@@ -55,6 +57,54 @@ export function Skills({
 }: SkillsProps) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [addDialogOpen, setAddDialogOpen] = React.useState(false)
+  const [loadingSkills, setLoadingSkills] = React.useState<Set<string>>(new Set())
+
+  const handleToggleSkill = async (skillId: string, currentlyHas: boolean) => {
+    if (!currentMemberId) return
+
+    setLoadingSkills((prev) => new Set(prev).add(skillId))
+
+    if (currentlyHas) {
+      // Remove skill
+      const { error } = await supabase
+        .from('member_skills')
+        .delete()
+        .eq('org_id', organizationId)
+        .eq('member_id', currentMemberId)
+        .eq('skill_id', skillId)
+
+      if (error) {
+        toast.error('Failed to remove skill')
+        console.error(error)
+      } else {
+        toast.success('Skill removed')
+        onSkillsUpdated()
+      }
+    } else {
+      // Add skill
+      const { error } = await supabase
+        .from('member_skills')
+        .insert({
+          org_id: organizationId,
+          member_id: currentMemberId,
+          skill_id: skillId,
+        })
+
+      if (error) {
+        toast.error('Failed to add skill')
+        console.error(error)
+      } else {
+        toast.success('Skill added')
+        onSkillsUpdated()
+      }
+    }
+
+    setLoadingSkills((prev) => {
+      const newSet = new Set(prev)
+      newSet.delete(skillId)
+      return newSet
+    })
+  }
 
   // Group skills with their members
   const skillsWithMembers = React.useMemo(() => {
@@ -151,9 +201,17 @@ export function Skills({
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex flex-1 items-center gap-4">
                     <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className="text-base">
+                      <Badge 
+                        variant={currentMemberId && skill.memberIds.includes(currentMemberId) ? "default" : "secondary"} 
+                        className="text-base"
+                      >
                         {skill.skill.name}
                       </Badge>
+                      {currentMemberId && skill.memberIds.includes(currentMemberId) && (
+                        <span className="text-xs text-muted-foreground">
+                          You have this skill
+                        </span>
+                      )}
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Users className="size-4" />
                         <span>
@@ -195,13 +253,19 @@ export function Skills({
                   <div className="flex items-center gap-2">
                     {canAssignSelf && currentMemberId && (
                       <Button
-                        variant="ghost"
+                        variant={skill.memberIds.includes(currentMemberId) ? "outline" : "ghost"}
                         size="sm"
                         className="opacity-0 transition-opacity group-hover:opacity-100"
+                        onClick={() => handleToggleSkill(skill.skill.id, skill.memberIds.includes(currentMemberId))}
+                        disabled={loadingSkills.has(skill.skill.id)}
                       >
-                        {skill.memberIds.includes(currentMemberId)
-                          ? "Remove"
-                          : "Add me"}
+                        {loadingSkills.has(skill.skill.id) ? (
+                          "..."
+                        ) : skill.memberIds.includes(currentMemberId) ? (
+                          "Remove"
+                        ) : (
+                          "Add me"
+                        )}
                       </Button>
                     )}
                   </div>
