@@ -9,7 +9,8 @@ declare
   code text;
 begin
   loop
-    code := 'BERNAS-' || upper(substr(encode(gen_random_uuid()::bytea, 'hex'), 1, 6));
+    code :=
+      'BERNAS-' || upper(substr(encode(uuid_send(gen_random_uuid()), 'hex'), 1, 6));
     exit when not exists (
       select 1 from public.organizations where join_code = code
     );

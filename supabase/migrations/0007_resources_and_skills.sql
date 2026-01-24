@@ -1,7 +1,7 @@
 -- =====================================================================
--- SEPARATE SKILLS FROM TAGS
+-- RESOURCES AND SKILLS SYSTEM
 -- =====================================================================
--- This migration separates skills from tags:
+-- This migration defines the skills system:
 -- - Tags: UPPERCASE, for categorizing events/resources
 -- - Skills: lowercase, for matching people to work (events/tasks)
 -- =====================================================================

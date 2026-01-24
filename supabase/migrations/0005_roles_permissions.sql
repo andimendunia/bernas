@@ -292,8 +292,19 @@ begin
   update public.join_requests
   set status = 'approved',
       reviewed_at = now(),
-      reviewed_by = auth.uid()
+      reviewed_by = (select auth.uid())
   where id = request_id;
+
+  -- Update user metadata to mark as onboarded and set active org
+  update auth.users
+  set raw_user_meta_data =
+    coalesce(raw_user_meta_data, '{}'::jsonb) ||
+    jsonb_build_object(
+      'onboarded', true,
+      'org_id', req.org_id,
+      'active_org_id', req.org_id
+    )
+  where id = req.user_id;
 end;
 $$;
 
@@ -484,23 +495,20 @@ using (
 );
 
 -- Join_requests table policies
--- Users can view their own requests
-create policy join_requests_select_own
+-- Users can view their own requests or org members with permission
+create policy join_requests_select
 on public.join_requests
 for select
-using (user_id = auth.uid());
-
--- Org members with permission can view all requests for their org
-create policy join_requests_select_org
-on public.join_requests
-for select
-using (public.has_permission(org_id, 'join_requests.view'));
+using (
+  (select auth.uid()) = user_id
+  or public.has_permission(org_id, 'join_requests.view')
+);
 
 -- Anyone authenticated can create their own request
 create policy join_requests_insert
 on public.join_requests
 for insert
-with check (user_id = auth.uid());
+with check ((select auth.uid()) = user_id);
 
 -- Only members with permission can update (approve/reject)
 create policy join_requests_update

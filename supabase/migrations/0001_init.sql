@@ -10,6 +10,8 @@ create type public.resource_link_type as enum ('org', 'event', 'task');
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+security definer
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -169,7 +171,7 @@ using (public.is_org_member(id));
 create policy organizations_insert
 on public.organizations
 for insert
-with check (auth.uid() = created_by);
+with check ((select auth.uid()) = created_by);
 
 create policy organizations_update
 on public.organizations
@@ -191,7 +193,7 @@ create policy org_members_insert
 on public.org_members
 for insert
 with check (
-  auth.uid() = user_id
+  (select auth.uid()) = user_id
   or public.is_org_member(org_id)
 );
 

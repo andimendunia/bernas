@@ -41,17 +41,12 @@
 ## Supabase schema + RLS
 
 **Migrations (in order):**
-1. `0001_init.sql` - Base schema (organizations, members, events, tasks, tags, participation, resources)
-2. `0002_org_onboarding.sql` - Onboarding helper functions
-3. `0003_fix_join_code.sql` - Join code unique constraint fix
-4. `0004_org_avatar.sql` - Organization avatar (emoji + color)
-5. `0005_roles_permissions.sql` - Roles & permissions system, join requests workflow
-6. `0006_user_email_helper.sql` - User email helper function
-7. `20260116192146_fix_set_updated_at_search_path.sql` - Security fix for set_updated_at trigger
-8. `20260116192457_fix_rls_performance.sql` - RLS performance optimization (auth.uid wrapping)
-9. `20260116200052_fix_approve_join_request_onboarding.sql` - Fix onboarding metadata on join approval
-10. `20260118000000_resources_and_skills.sql` - Resources tags and initial skills (DEPRECATED - skills were tags)
-11. `20260118000001_separate_skills_from_tags.sql` - Skills system (separate from tags)
+1. `0001_init.sql` - Base schema (organizations, members, events, tasks, tags, participation, resources) with RLS performance optimizations
+2. `0002_org_onboarding.sql` - Onboarding helper functions and join code generator
+3. `0004_org_avatar.sql` - Organization avatar (emoji + color)
+4. `0005_roles_permissions.sql` - Roles & permissions system, join requests workflow with onboarding metadata
+5. `0006_user_email_helper.sql` - User email helper function
+6. `0007_resources_and_skills.sql` - Resources and skills system (skills separate from tags)
 
 **Key Tables:**
 - `organizations` - Organization data with join codes and avatars
