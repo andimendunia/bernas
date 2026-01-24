@@ -31,6 +31,7 @@ export function TeamSwitcher({
     plan: string
     avatar_emoji: string
     avatar_color: string
+    slug?: string
   }[]
   activeOrgId?: string | null
 }) {
@@ -68,14 +69,26 @@ export function TeamSwitcher({
     setSwitchingToTeam(targetTeam)
     setSaving(true)
     
+    const updateData: { active_org_id: string; last_visited_org_slug?: string } = {
+      active_org_id: teamId,
+    }
+
+    if (targetTeam.slug) {
+      updateData.last_visited_org_slug = targetTeam.slug
+    }
+
     const { error } = await supabase.auth.updateUser({
-      data: { active_org_id: teamId },
+      data: updateData,
     })
 
     if (!error) {
-      router.refresh()
-      // Wait for router.refresh to complete
-      await new Promise(resolve => setTimeout(resolve, 300))
+      if (targetTeam.slug) {
+        router.push(`/${targetTeam.slug}`)
+      } else {
+        router.refresh()
+      }
+      // Wait for navigation/refresh to complete
+      await new Promise((resolve) => setTimeout(resolve, 300))
     }
     
     setSaving(false)

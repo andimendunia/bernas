@@ -1,7 +1,7 @@
 "use client"
 
 import { type LucideIcon } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -23,14 +23,22 @@ export function NavProjects({
   }[]
 }) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => {
-          const isActive = pathname === item.url || pathname.startsWith(item.url + '/')
-          
+          const currentTab = searchParams.get("tab")
+          const [itemPath, itemQuery] = item.url.split("?")
+          const queryTab = itemQuery?.startsWith("tab=")
+            ? itemQuery.replace("tab=", "")
+            : null
+          const isActive = queryTab
+            ? pathname === itemPath && currentTab === queryTab
+            : pathname === itemPath && (!currentTab || currentTab === "members")
+           
           return (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton asChild size="sm">

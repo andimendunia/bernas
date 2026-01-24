@@ -41,12 +41,14 @@ type OrganizationTeam = {
   plan: string
   avatar_emoji: string
   avatar_color: string
+  slug?: string
 }
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   user?: SidebarUser
   organizations?: OrganizationTeam[]
   activeOrgId?: string | null
+  activeOrgSlug?: string | null
   isAdmin?: boolean
 }
 
@@ -97,6 +99,7 @@ export function AppSidebar({
   user = fallbackUser,
   organizations = [],
   activeOrgId,
+  activeOrgSlug,
   isAdmin = false,
   ...props
 }: AppSidebarProps) {
@@ -105,24 +108,65 @@ export function AppSidebar({
     organizations[0]?.name ??
     "Organization"
 
-  const projects = [
-    {
-      name: "Organization info",
-      url: "/dashboard/organization/info",
-    },
-    {
-      name: "Skills",
-      url: "/dashboard/organization/skills",
-    },
-    {
-      name: "Tags",
-      url: "/dashboard/organization/tags",
-    },
-    ...(isAdmin ? [{
-      name: "Administration",
-      url: "/dashboard/organization/administration",
-    }] : []),
-  ]
+  const resolveUrl = (url: string) => {
+    if (!activeOrgSlug) return url
+    return url.replace("/dashboard", `/${activeOrgSlug}`)
+  }
+
+  const navMain = data.navMain.map((item) => ({
+    ...item,
+    url: resolveUrl(item.url),
+    items: item.items?.map((subItem) => ({
+      ...subItem,
+      url: resolveUrl(subItem.url),
+    })),
+  }))
+
+  const projects = activeOrgSlug
+    ? [
+        {
+          name: "Organization info",
+          url: `/${activeOrgSlug}`,
+        },
+        {
+          name: "Skills",
+          url: `/${activeOrgSlug}?tab=skills`,
+        },
+        {
+          name: "Tags",
+          url: `/${activeOrgSlug}?tab=tags`,
+        },
+        ...(isAdmin
+          ? [
+              {
+                name: "Administration",
+                url: `/${activeOrgSlug}/administration`,
+              },
+            ]
+          : []),
+      ]
+    : [
+        {
+          name: "Organization info",
+          url: "/dashboard/organization/info",
+        },
+        {
+          name: "Skills",
+          url: "/dashboard/organization/skills",
+        },
+        {
+          name: "Tags",
+          url: "/dashboard/organization/tags",
+        },
+        ...(isAdmin
+          ? [
+              {
+                name: "Administration",
+                url: "/dashboard/organization/administration",
+              },
+            ]
+          : []),
+      ]
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -130,7 +174,7 @@ export function AppSidebar({
         <TeamSwitcher teams={organizations} activeOrgId={activeOrgId} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
         <NavProjects label={activeOrgName} projects={projects} />
       </SidebarContent>
       <SidebarFooter>
