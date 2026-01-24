@@ -9,7 +9,7 @@ export const metadata = {
 export default async function EventTagsPage({
   params,
 }: {
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }) {
   const { orgSlug } = await params
 

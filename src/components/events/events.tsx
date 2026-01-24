@@ -60,6 +60,7 @@ type Event = {
 
 type EventsProps = {
   organizationId: string
+  orgSlug: string
   events: Event[]
   tags: Tag[]
   resources: Resource[]
@@ -86,6 +87,7 @@ function formatIndonesianDate(dateString: string): string {
 
 export function Events({
   organizationId,
+  orgSlug,
   events,
   tags,
   resources,
@@ -257,7 +259,7 @@ export function Events({
               <div
                 key={event.id}
                 className="group cursor-pointer rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
-                onClick={() => router.push(`/dashboard/events/${event.id}`)}
+                onClick={() => router.push(`/${orgSlug}/events/${event.id}`)}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">

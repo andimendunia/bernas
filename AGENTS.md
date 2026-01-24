@@ -42,14 +42,14 @@
 
 **Migrations (in order):**
 1. `0001_init.sql` - Base schema (organizations, members, events, tasks, tags, participation, resources) with RLS performance optimizations
-2. `0002_org_onboarding.sql` - Onboarding helper functions and join code generator
-3. `0004_org_avatar.sql` - Organization avatar (emoji + color)
-4. `0005_roles_permissions.sql` - Roles & permissions system, join requests workflow with onboarding metadata
-5. `0006_user_email_helper.sql` - User email helper function
-6. `0007_resources_and_skills.sql` - Resources and skills system (skills separate from tags)
+2. `0002_org_setup.sql` - Organization setup (join codes, avatars, creation function)
+3. `0003_roles_permissions.sql` - Roles & permissions system, join requests workflow
+4. `0004_user_email_helper.sql` - User email helper function
+5. `0005_resources_skills.sql` - Resources and skills system (skills separate from tags)
+6. `0006_org_slug.sql` - Organization slug system for URL routing (unique, validated, reserved slug blocking)
 
 **Key Tables:**
-- `organizations` - Organization data with join codes and avatars
+- `organizations` - Organization data with join codes, avatars, and unique slugs
 - `org_members` - Membership records with role assignments
 - `roles` - Custom roles per organization
 - `permissions` - System-wide permissions (read-only, predefined)
@@ -72,32 +72,57 @@
 
 ## Onboarding flow
 - **Route**: `/onboarding`
-- **Access**: Redirects to `/dashboard` if already onboarded
+- **Access**: Redirects to `/{last_visited_org_slug}/overview` if already onboarded
 - **Workflow**:
   1. User chooses: Create new organization OR Join existing
-  2. **Create**: Directly creates org + member record, sets user metadata
+  2. **Create**: 
+     - User enters org name (slug auto-suggested, editable)
+     - Slug validated: 3-50 chars, lowercase, hyphens, no reserved words
+     - Creates org + member record, sets user metadata
+     - Redirects to `/{org_slug}/overview`
   3. **Join**: Submits join request, shows dialog confirmation, waits for admin approval
-- **Join Request Approval**: Admin approves via `/dashboard/organization/administration` tab
-- **User Metadata**: Sets `onboarded: true`, `org_id`, `active_org_id` after creation/approval
-- **Dashboard Access**: Requires `user_metadata.onboarded === true`
+- **Join Request Approval**: Admin approves via `/{org_slug}/administration`
+- **User Metadata**: Sets `onboarded: true`, `org_id`, `active_org_id`, `last_visited_org_slug`
+- **Slug Validation**: Real-time via `check_slug_available()` RPC (checks format, reserved words, uniqueness)
 
-## Navigation
-- Dashboard wrapper: `src/app/dashboard/layout.tsx`
+## Navigation & Routing
+- **URL Structure**: All routes are scoped to organization slug: `/{org_slug}/*`
+- Organization layout: `src/app/[orgSlug]/layout.tsx`
 - Sidebar: `src/components/app-sidebar.tsx`
 - Main nav sections: `src/components/nav-main.tsx` (collapsible menu sections)
-- Organization switcher: `src/components/team-switcher.tsx`
+- Organization switcher: `src/components/team-switcher.tsx` (preserves feature context when switching)
 - Organization menu: `src/components/nav-projects.tsx` (context-aware with active state detection)
 
-**Organization Routes:**
-- `/dashboard/organization/info` - Organization info + members table
-- `/dashboard/organization/info/edit` - Edit organization details
-- `/dashboard/organization/administration` - Admin panel (roles, join requests, danger zone)
-- `/dashboard/organization/members` - Legacy members page (not in sidebar)
+**Slug-Based Routes:**
+- `/{org_slug}/overview` - Dashboard home
+- `/{org_slug}/calendar` - Calendar view
+- `/{org_slug}/events` - Events list
+- `/{org_slug}/events/[id]` - Event detail page
+- `/{org_slug}/events/tags` - Manage event tags
+- `/{org_slug}/tasks` - All tasks
+- `/{org_slug}/tasks/mine` - My tasks
+- `/{org_slug}/resources` - Resource library
+- `/{org_slug}/participation` - Event participation
+- `/{org_slug}` - Organization info with tabs (Members, Skills, Tags)
+- `/{org_slug}/administration` - Admin panel (roles, join requests, danger zone)
+
+**Organization Profile Page Structure:**
+```
+/{org_slug}
+├── Organization Info Panel (persists across tabs)
+│   ├── Avatar, Name, Member Count
+│   ├── Join Code
+│   └── Edit Button
+└── Tabs
+    ├── Members (members table)
+    ├── Skills (skills management)
+    └── Tags (tags management)
+```
 
 **Breadcrumb Pattern:**
 - Use `<DashboardHeader>` component for consistent breadcrumb navigation
 - Format: `Organization Name > Section > Page`
-- Example: `<DashboardHeader title="Members" sectionHref="/dashboard/organization/info" sectionLabel={orgName} />`
+- Example: `<DashboardHeader title="Info" sectionHref="/{orgSlug}" sectionLabel={orgName} />`
 
 ## Permission system
 Quick reference (detailed in [PATTERNS.md](./PATTERNS.md)):
@@ -158,12 +183,21 @@ export function Component({ data, onUpdate }) {
 ## Data fetching
 Quick reference (detailed in [PATTERNS.md](./PATTERNS.md)):
 
-**Active Organization Pattern:**
+**Organization from Slug Pattern:**
 ```typescript
-const { data: userData } = await supabase.auth.getUser()
-const activeOrgId = userData.user?.user_metadata.active_org_id
-if (!activeOrgId) redirect("/onboarding")
+const { orgSlug } = await params
+const supabase = await createSupabaseServerClient()
+
+const { data: org } = await supabase
+  .from("organizations")
+  .select("id, name, slug")
+  .eq("slug", orgSlug)
+  .single()
+
+if (!org) redirect("/onboarding")
 ```
+
+**Note**: The `[orgSlug]` layout validates org membership before rendering child routes.
 
 **Permission Helpers**: Use functions from `src/lib/permissions-server.ts`
 - `getOrgMembers(orgId)` - Get members with user data and roles
@@ -234,25 +268,31 @@ $$;
 → See [PATTERNS.md](./PATTERNS.md) for detailed conventions
 
 ## Page titles
-- Org-context pages use `Page - Organization Name` (e.g., `Members - Panggung Minoritas`)
+- Org-context pages use `Page - Organization Name` (e.g., `Info - Panggung Minoritas`)
 - Non-org pages use `Page - Bernas`
 
 ## Files to know
 
 **Pages:**
 - `src/app/page.tsx` - Landing page
-- `src/app/dashboard/page.tsx` - Dashboard home
-- `src/app/onboarding/page.tsx` - Onboarding flow
-- `src/app/dashboard/organization/info/page.tsx` - Organization info + members table
-- `src/app/dashboard/organization/administration/page.tsx` - Admin panel
+- `src/app/onboarding/page.tsx` - Onboarding flow with slug input
+- `src/app/[orgSlug]/layout.tsx` - Organization layout (validates slug & membership)
+- `src/app/[orgSlug]/page.tsx` - Organization profile with tabs
+- `src/app/[orgSlug]/overview/page.tsx` - Dashboard home
+- `src/app/[orgSlug]/events/page.tsx` - Events list
+- `src/app/[orgSlug]/events/[id]/page.tsx` - Event detail page
+- `src/app/[orgSlug]/administration/page.tsx` - Admin panel
 
 **Components:**
 - `src/components/ui/*` - shadcn/ui primitives (23 components)
 - `src/components/app-sidebar.tsx` - Main application sidebar
 - `src/components/nav-*.tsx` - Navigation components (nav-main, nav-projects, nav-user)
-- `src/components/organization/*` - Organization-related components
+- `src/components/organization/organization-info-panel.tsx` - Persistent org info panel
+- `src/components/organization/organization-profile.tsx` - Tabbed org profile
+- `src/components/organization/organization-info.tsx` - Members table
 - `src/components/members/*` - Member management components
 - `src/components/administration/*` - Administration panel components
+- `src/components/onboarding/slug-input.tsx` - Slug input with real-time validation
 
 **Libraries:**
 - `src/lib/supabase/client.ts` - Client-side Supabase instance

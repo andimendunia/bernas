@@ -56,7 +56,7 @@ const data = {
   navMain: [
     {
       title: "Overview",
-      url: "/dashboard",
+      url: "/dashboard/overview",
       icon: GalleryVerticalEnd,
       isActive: true,
     },
@@ -128,14 +128,6 @@ export function AppSidebar({
           name: "Organization info",
           url: `/${activeOrgSlug}`,
         },
-        {
-          name: "Skills",
-          url: `/${activeOrgSlug}?tab=skills`,
-        },
-        {
-          name: "Tags",
-          url: `/${activeOrgSlug}?tab=tags`,
-        },
         ...(isAdmin
           ? [
               {
@@ -149,14 +141,6 @@ export function AppSidebar({
         {
           name: "Organization info",
           url: "/dashboard/organization/info",
-        },
-        {
-          name: "Skills",
-          url: "/dashboard/organization/skills",
-        },
-        {
-          name: "Tags",
-          url: "/dashboard/organization/tags",
         },
         ...(isAdmin
           ? [

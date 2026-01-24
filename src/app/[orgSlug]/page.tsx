@@ -6,10 +6,6 @@ import { OrganizationProfileWrapper } from "@/components/organization/organizati
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { getOrgMembers } from "@/lib/permissions-server"
 
-export const metadata = {
-  title: "Organization",
-}
-
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
@@ -17,10 +13,11 @@ export default async function OrganizationProfilePage({
   params,
   searchParams,
 }: {
-  params: { orgSlug: string }
-  searchParams?: { tab?: string }
+  params: Promise<{ orgSlug: string }>
+  searchParams?: Promise<{ tab?: string }>
 }) {
   const { orgSlug } = await params
+  const resolvedSearchParams = searchParams ? await searchParams : {}
   const supabase = await createSupabaseServerClient()
   const { data: userData } = await supabase.auth.getUser()
   const user = userData.user
@@ -40,10 +37,10 @@ export default async function OrganizationProfilePage({
   }
 
   const defaultTab =
-    searchParams?.tab === "skills" ||
-    searchParams?.tab === "tags" ||
-    searchParams?.tab === "members"
-      ? searchParams.tab
+    resolvedSearchParams.tab === "skills" ||
+    resolvedSearchParams.tab === "tags" ||
+    resolvedSearchParams.tab === "members"
+      ? resolvedSearchParams.tab
       : "members"
 
   const [
@@ -151,7 +148,7 @@ export default async function OrganizationProfilePage({
   return (
     <div className="flex flex-1 flex-col">
       <DashboardHeader
-        title="Organization"
+        title="Info"
         sectionHref={`/${orgSlug}`}
         sectionLabel={org.name}
       />
@@ -193,7 +190,7 @@ export default async function OrganizationProfilePage({
 export async function generateMetadata({
   params,
 }: {
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }): Promise<Metadata> {
   const { orgSlug } = await params
   const supabase = await createSupabaseServerClient()

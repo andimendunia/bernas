@@ -1,6 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { OrganizationInfoPanel } from "@/components/organization/organization-info-panel"
 import { OrganizationInfo } from "@/components/organization/organization-info"
 import { Skills } from "@/components/skills/skills"
 import { Tags } from "@/components/tags/tags"
@@ -96,25 +97,35 @@ export function OrganizationProfile({
     defaultTab === "skills" || defaultTab === "tags" ? defaultTab : "members"
 
   return (
-    <Tabs defaultValue={resolvedTab} className="w-full" data-org-slug={orgSlug}>
-      <TabsList>
-        <TabsTrigger value="members">Members</TabsTrigger>
-        <TabsTrigger value="skills">Skills</TabsTrigger>
-        <TabsTrigger value="tags">Tags</TabsTrigger>
-      </TabsList>
+    <div className="w-full space-y-8">
+      {/* Organization Info Panel - persists across all tabs */}
+      <OrganizationInfoPanel
+        organization={org}
+        memberCount={members.length}
+        canEdit={permissions.canEditOrg}
+        onOrganizationUpdated={onUpdated}
+      />
 
-      <TabsContent value="members" className="mt-6">
-        <OrganizationInfo
-          organization={org}
-          canEdit={permissions.canEditOrg}
-          members={members}
-          memberSkills={memberSkills}
-          canChangeRole={permissions.canChangeRole}
-          canRemove={permissions.canRemove}
-          onMemberUpdated={onUpdated}
-          onOrganizationUpdated={onUpdated}
-        />
-      </TabsContent>
+      {/* Tabs for Members, Skills, Tags */}
+      <Tabs defaultValue={resolvedTab} className="w-full max-w-5xl" data-org-slug={orgSlug}>
+        <TabsList>
+          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="skills">Skills</TabsTrigger>
+          <TabsTrigger value="tags">Tags</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members" className="mt-6">
+          <OrganizationInfo
+            organization={org}
+            canEdit={permissions.canEditOrg}
+            members={members}
+            memberSkills={memberSkills}
+            canChangeRole={permissions.canChangeRole}
+            canRemove={permissions.canRemove}
+            onMemberUpdated={onUpdated}
+            onOrganizationUpdated={onUpdated}
+          />
+        </TabsContent>
 
       <TabsContent value="skills" className="mt-6">
         <Skills
@@ -141,5 +152,6 @@ export function OrganizationProfile({
         />
       </TabsContent>
     </Tabs>
+    </div>
   )
 }

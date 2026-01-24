@@ -160,7 +160,7 @@ export default async function Page() {
   
   // Compare with === true (RPC can return null/undefined)
   if (canEdit !== true) {
-    redirect("/dashboard")
+    redirect(`/${orgSlug}/overview`)
   }
   
   // Pass boolean to client
@@ -174,11 +174,11 @@ For admin-exclusive pages, check admin status first:
 
 ```typescript
 const { data: isAdmin } = await supabase.rpc('is_org_admin', {
-  check_org_id: activeOrgId
+  check_org_id: org.id
 })
 
 if (isAdmin !== true) {
-  redirect("/dashboard")
+  redirect(`/${orgSlug}/overview`)
 }
 ```
 
@@ -221,9 +221,10 @@ export default function Page() {
 ✅ **Correct**: Always check on server first
 ```typescript
 // GOOD: Server-side check before rendering
-export default async function Page() {
+export default async function Page({ params }: { params: Promise<{ orgSlug: string }> }) {
+  const { orgSlug } = await params
   const { data: canEdit } = await supabase.rpc('has_permission', ...)
-  if (canEdit !== true) redirect("/dashboard")
+  if (canEdit !== true) redirect(`/${orgSlug}/overview`)
 }
 ```
 
@@ -670,17 +671,17 @@ Navigation in Bernas uses consistent breadcrumb patterns with the DashboardHeade
 ### Breadcrumb Implementation
 
 ```typescript
-import { DashboardHeader } from "@/components/dashboard-header"
+import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 
-// Two-level breadcrumb (Section > Page)
+// Two-level breadcrumb (Organization > Page)
 <DashboardHeader
-  title="Members"
-  sectionHref="/dashboard/organization/info"
-  sectionLabel={organization.name}
+  title="Info"
+  sectionHref={`/${orgSlug}`}
+  sectionLabel={org.name}
 />
 
-// Single-level breadcrumb
-<DashboardHeader title="Dashboard" />
+// Single-level breadcrumb (top-level page)
+<DashboardHeader title="Events" />
 ```
 
 ### Page Layout Structure

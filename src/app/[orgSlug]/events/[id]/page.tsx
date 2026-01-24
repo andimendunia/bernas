@@ -23,10 +23,10 @@ export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 type EventPageProps = {
-  params: {
+  params: Promise<{
     id: string
     orgSlug: string
-  }
+  }>
 }
 
 type EventTagLinkRow = {
@@ -224,6 +224,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           tasks={tasks}
           canEdit={canEditResult.data === true}
           canCreateTasks={canCreateTasksResult.data === true}
+          orgSlug={orgSlug}
         />
       </div>
     </div>

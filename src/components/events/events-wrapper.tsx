@@ -42,6 +42,7 @@ type Event = {
 
 type EventsWrapperProps = {
   organizationId: string
+  orgSlug: string
   events: Event[]
   tags: Tag[]
   resources: Resource[]

@@ -11,7 +11,7 @@ const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 export default async function CalendarPage({
   params,
 }: {
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }) {
   const { orgSlug } = await params
   void orgSlug

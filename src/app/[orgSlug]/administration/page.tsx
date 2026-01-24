@@ -16,7 +16,7 @@ export const revalidate = 0
 export default async function AdministrationPage({
   params,
 }: {
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }) {
   const { orgSlug } = await params
   const supabase = await createSupabaseServerClient()

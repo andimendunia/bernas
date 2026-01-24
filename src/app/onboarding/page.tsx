@@ -40,6 +40,7 @@ export default function OnboardingPage() {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [successDialogOpen, setSuccessDialogOpen] = React.useState(false)
+  const [lastVisitedSlug, setLastVisitedSlug] = React.useState<string | null>(null)
   const emojiOptions = [
     "🏢",
     "🏛️",
@@ -203,7 +204,7 @@ export default function OnboardingPage() {
       return
     }
 
-    router.push("/dashboard")
+    router.push(`/${orgSlug}/overview`)
   }
 
   const handleJoin = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -244,9 +245,14 @@ export default function OnboardingPage() {
     const checkOnboarding = async () => {
       const { data } = await supabase.auth.getUser()
       const onboarded = data.user?.user_metadata?.onboarded
+      const lastSlug = data.user?.user_metadata?.last_visited_org_slug
 
-      if (onboarded && mode !== "add") {
-        router.replace("/dashboard")
+      if (lastSlug) {
+        setLastVisitedSlug(lastSlug)
+      }
+
+      if (onboarded && mode !== "add" && lastSlug) {
+        router.replace(`/${lastSlug}/overview`)
       }
     }
 
@@ -261,12 +267,12 @@ export default function OnboardingPage() {
             <BrandMark />
             <div className="text-lg font-semibold tracking-tight">Bernas</div>
           </div>
-          {mode === "add" ? (
+          {mode === "add" && lastVisitedSlug ? (
             <a
-              href="/dashboard"
+              href={`/${lastVisitedSlug}/overview`}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              ← Back to Dashboard
+              ← Back to Organization
             </a>
           ) : null}
         </header>

@@ -8,7 +8,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server"
 export async function generateMetadata({
   params,
 }: {
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }): Promise<Metadata> {
   const { orgSlug } = await params
   const supabase = await createSupabaseServerClient()
@@ -26,7 +26,7 @@ export async function generateMetadata({
 export default async function Page({
   params,
 }: {
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }) {
   const { orgSlug } = await params
   void orgSlug

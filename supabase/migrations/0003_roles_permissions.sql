@@ -382,7 +382,7 @@ $$;
 
 -- Function: Update create_org_with_member
 -- Set creator as admin and create default role
-drop function if exists public.create_org_with_member(text, text, text);
+-- Uses CREATE OR REPLACE to update function with new roles logic
 
 create or replace function public.create_org_with_member(
   org_name text,

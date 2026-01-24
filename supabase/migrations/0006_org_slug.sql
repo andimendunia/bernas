@@ -169,7 +169,11 @@ grant execute on function public.check_slug_available to authenticated;
 -- 6. UPDATE CREATE_ORG_WITH_MEMBER FUNCTION
 -- ---------------------------------------------------------------------
 
--- Update the organization creation function to include slug
+-- Drop previous signature to allow new parameter (org_slug)
+-- Note: PostgreSQL requires DROP when changing function signature
+drop function if exists public.create_org_with_member(text, text, text);
+
+-- Create organization with slug support
 create or replace function public.create_org_with_member(
   org_name text,
   org_slug text,
@@ -183,8 +187,6 @@ set search_path = public
 as $$
 declare
   new_org_id uuid;
-  new_member_id uuid;
-  default_role_id uuid;
 begin
   -- Validate slug format
   if not (
@@ -210,36 +212,17 @@ begin
     raise exception 'Slug already taken';
   end if;
 
-  -- Create organization with slug
-  insert into organizations (name, slug, avatar_emoji, avatar_color, created_by)
-  values (org_name, org_slug, org_emoji, org_color, (select auth.uid()))
+  -- Create organization with slug and join code
+  insert into organizations (name, slug, avatar_emoji, avatar_color, join_code, created_by)
+  values (org_name, org_slug, org_emoji, org_color, public.generate_join_code(), auth.uid())
   returning id into new_org_id;
 
-  -- Create admin role for this organization
-  insert into roles (org_id, name, description, is_admin, is_default)
-  values (
-    new_org_id,
-    'Admin',
-    'Organization administrator with full permissions',
-    true,
-    false
-  );
-
-  -- Create default member role
-  insert into roles (org_id, name, description, is_admin, is_default)
-  values (
-    new_org_id,
-    'Member',
-    'Default role for organization members',
-    false,
-    true
-  )
-  returning id into default_role_id;
-
-  -- Add creator as admin member (no role assignment, is_admin = true)
-  insert into org_members (org_id, user_id, is_admin, role_id)
-  values (new_org_id, (select auth.uid()), true, null)
-  returning id into new_member_id;
+  -- Add creator as admin member (no role needed, is_admin = true gives full permissions)
+  insert into org_members (org_id, user_id, is_admin)
+  values (new_org_id, auth.uid(), true);
+  
+  -- Create default "Member" role with view permissions
+  perform public.create_default_member_role(new_org_id);
 
   -- Note: User metadata (onboarded, active_org_id, last_visited_org_slug) 
   -- should be updated by the application layer after this function returns

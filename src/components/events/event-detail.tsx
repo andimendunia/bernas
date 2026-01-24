@@ -75,6 +75,7 @@ export type EventDetailProps = {
   tasks: EventTask[]
   canEdit: boolean
   canCreateTasks: boolean
+  orgSlug: string
   onEventUpdated: () => void
 }
 
@@ -101,7 +102,7 @@ function formatIndonesianDate(dateString: string): string {
   return `${day} ${month} ${year}`
 }
 
-export function EventDetail({ event, resources, skills, tasks }: EventDetailProps) {
+export function EventDetail({ event, resources, skills, tasks, orgSlug }: EventDetailProps) {
   const startDate = event.metadata?.start_date
   const endDate = event.metadata?.end_date
   const dateRange = startDate
@@ -116,7 +117,7 @@ export function EventDetail({ event, resources, skills, tasks }: EventDetailProp
     <div className="flex w-full max-w-4xl flex-col gap-8">
       <section className="flex flex-col gap-4">
         <Button variant="ghost" asChild className="w-fit px-0">
-          <Link href="/dashboard/events" className="flex items-center gap-2">
+          <Link href={`/${orgSlug}/events`} className="flex items-center gap-2">
             <ArrowLeft className="size-4" />
             Back to Events
           </Link>

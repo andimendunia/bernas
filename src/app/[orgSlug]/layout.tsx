@@ -14,7 +14,7 @@ export default async function OrgLayout({
   params,
 }: {
   children: React.ReactNode
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }) {
   const { orgSlug } = await params
   const supabase = await createSupabaseServerClient()
@@ -126,7 +126,7 @@ export default async function OrgLayout({
 export async function generateMetadata({
   params,
 }: {
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }): Promise<Metadata> {
   const { orgSlug } = await params
   const supabase = await createSupabaseServerClient()

@@ -15,7 +15,7 @@ export const revalidate = 0
 export default async function EventsPage({
   params,
 }: {
-  params: { orgSlug: string }
+  params: Promise<{ orgSlug: string }>
 }) {
   const { orgSlug } = await params
   const supabase = await createSupabaseServerClient()
@@ -137,6 +137,7 @@ export default async function EventsPage({
       <div className="flex flex-1 items-start justify-center p-4 pt-0">
         <EventsWrapper
           organizationId={activeOrgId}
+          orgSlug={orgSlug}
           events={events}
           tags={tags ?? []}
           resources={resources ?? []}
