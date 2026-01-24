@@ -13,12 +13,16 @@ type DashboardHeaderProps = {
   title: string
   sectionHref?: string
   sectionLabel?: string
+  subsectionHref?: string
+  subsectionLabel?: string
 }
 
 export function DashboardHeader({
   title,
   sectionHref = "/dashboard",
   sectionLabel,
+  subsectionHref,
+  subsectionLabel,
 }: DashboardHeaderProps) {
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -38,9 +42,23 @@ export function DashboardHeader({
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{title}</BreadcrumbPage>
-                </BreadcrumbItem>
+                {subsectionLabel && subsectionHref ? (
+                  <>
+                    <BreadcrumbItem className="hidden md:block">
+                      <BreadcrumbLink href={subsectionHref}>
+                        {subsectionLabel}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{title}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
+                ) : (
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{title}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                )}
               </>
             ) : (
               <BreadcrumbItem>

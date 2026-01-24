@@ -222,9 +222,11 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   return (
     <div className="flex flex-1 flex-col">
       <DashboardHeader
-        title={event.name}
-        sectionHref="/dashboard/events"
+        title="Event details"
+        sectionHref="/dashboard"
         sectionLabel={activeOrg.name}
+        subsectionHref="/dashboard/events"
+        subsectionLabel="Events"
       />
       <div className="flex flex-1 items-start justify-center p-4 pt-0">
         <EventDetailWrapper

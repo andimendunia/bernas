@@ -42,7 +42,8 @@ export function NavMain({
       <SidebarMenu>
         {items.map((item) => {
           const isParentActive =
-            item.url === pathname ||
+            pathname === item.url ||
+            pathname.startsWith(item.url + '/') ||
             item.items?.some((subItem) => subItem.url === pathname)
 
           if (item.items?.length) {
@@ -98,7 +99,7 @@ export function NavMain({
             )
           }
 
-          const isActive = item.url === pathname
+          const isActive = pathname === item.url || pathname.startsWith(item.url + '/')
           return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild tooltip={item.title}>
