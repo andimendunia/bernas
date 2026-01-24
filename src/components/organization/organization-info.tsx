@@ -189,13 +189,9 @@ export function OrganizationInfo({
                     +{remainingSkills.length}
                   </Badge>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-64">
-                  <div className="flex flex-wrap gap-1">
-                    {remainingSkills.map((skill) => (
-                      <Badge key={skill.id} variant="outline" className="text-xs">
-                        {skill.name}
-                      </Badge>
-                    ))}
+                <TooltipContent className="max-w-xs">
+                  <div className="text-xs">
+                    {remainingSkills.map((skill) => skill.name).join(", ")}
                   </div>
                 </TooltipContent>
               </Tooltip>
