@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -94,6 +95,7 @@ export function Events({
   canDelete,
   onEventsUpdated,
 }: EventsProps) {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
   const [addDialogOpen, setAddDialogOpen] = React.useState(false)
@@ -254,7 +256,8 @@ export function Events({
             return (
               <div
                 key={event.id}
-                className="group rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
+                className="group cursor-pointer rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
+                onClick={() => router.push(`/dashboard/events/${event.id}`)}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
@@ -315,12 +318,16 @@ export function Events({
 
                   <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                     {(canEdit || canDelete) && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <MoreVertical className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {canEdit && (
                             <>
