@@ -67,11 +67,11 @@ export default async function OrganizationInfoPage() {
 
   // Transform member skills (filter out invalid skills)
   const memberSkills = (memberSkillsRaw ?? [])
-    .filter((ms: any) => ms.skills?.[0]?.id && ms.skills?.[0]?.name)
+    .filter((ms: any) => ms.skills?.id && ms.skills?.name)
     .map((ms: any) => ({
       member_id: ms.member_id,
       skill_id: ms.skill_id,
-      skill: ms.skills[0],
+      skill: ms.skills,
     }))
 
   // Check permissions

@@ -79,8 +79,8 @@ export default async function SkillsPage() {
   // Transform the data to match expected type
   const memberSkills = (memberSkillsRaw ?? []).map((ms: any) => ({
     ...ms,
-    skills: ms.skills?.[0] ?? { id: '', name: '', description: null, color: null },
-    org_members: ms.org_members?.[0] ?? { id: '', user_id: '', is_admin: false },
+    skills: ms.skills ?? { id: '', name: '', description: null, color: null },
+    org_members: ms.org_members ?? { id: '', user_id: '', is_admin: false },
   }))
 
   // Get all members
