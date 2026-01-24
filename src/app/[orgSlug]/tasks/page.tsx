@@ -16,9 +16,7 @@ export default async function TasksPage({
   return (
     <div className="flex flex-1 flex-col">
       <DashboardHeader
-        title="All tasks"
-        sectionHref={`/${orgSlug}/tasks`}
-        sectionLabel="Tasks"
+        title="Tasks"
       />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <Card className="p-6">

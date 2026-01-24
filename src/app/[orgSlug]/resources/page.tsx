@@ -103,8 +103,6 @@ export default async function ResourcesPage({
     <div className="flex flex-1 flex-col">
       <DashboardHeader
         title="Resources"
-        sectionHref={`/${orgSlug}/resources`}
-        sectionLabel={org.name}
       />
       <div className="flex flex-1 items-start justify-center p-4 pt-0">
         <ResourcesWrapper

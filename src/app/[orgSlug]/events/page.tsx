@@ -131,8 +131,6 @@ export default async function EventsPage({
     <div className="flex flex-1 flex-col">
       <DashboardHeader
         title="Events"
-        sectionHref={`/${orgSlug}/events`}
-        sectionLabel={org.name}
       />
       <div className="flex flex-1 items-start justify-center p-4 pt-0">
         <EventsWrapper

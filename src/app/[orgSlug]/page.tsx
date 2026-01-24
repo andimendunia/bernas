@@ -148,9 +148,7 @@ export default async function OrganizationProfilePage({
   return (
     <div className="flex flex-1 flex-col">
       <DashboardHeader
-        title="Info"
-        sectionHref={`/${orgSlug}`}
-        sectionLabel={org.name}
+        title="Organization info"
       />
       <div className="flex flex-1 items-start justify-center p-4 pt-0">
         <OrganizationProfileWrapper
