@@ -24,12 +24,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { SlugInput } from "@/components/onboarding/slug-input"
 import { supabase } from "@/lib/supabase/client"
 
 export default function OnboardingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [createName, setCreateName] = React.useState("")
+  const [orgSlug, setOrgSlug] = React.useState("")
+  const [isSlugValid, setIsSlugValid] = React.useState(false)
   const [joinCode, setJoinCode] = React.useState("")
   const [emoji, setEmoji] = React.useState("🤝")
   const [color, setColor] = React.useState("#f2b5b5")
@@ -173,8 +176,9 @@ export default function OnboardingPage() {
       "create_org_with_member",
       {
         org_name: createName,
-        avatar_emoji: emoji,
-        avatar_color: color,
+        org_slug: orgSlug,
+        org_emoji: emoji,
+        org_color: color,
       }
     )
 
@@ -189,6 +193,7 @@ export default function OnboardingPage() {
         onboarded: true,
         org_id: orgData,
         active_org_id: orgData,
+        last_visited_org_slug: orgSlug,
       },
     })
 
@@ -319,6 +324,12 @@ export default function OnboardingPage() {
                       required
                     />
                   </div>
+                  <SlugInput
+                    orgName={createName}
+                    value={orgSlug}
+                    onChange={setOrgSlug}
+                    onValidationChange={setIsSlugValid}
+                  />
                   <div className="grid gap-2">
                     <Label>Organization icon</Label>
                     <div className="relative">
@@ -381,7 +392,7 @@ export default function OnboardingPage() {
                       ))}
                     </div>
                   </div>
-                  <Button type="submit" disabled={loading}>
+                  <Button type="submit" disabled={loading || !isSlugValid}>
                     Create workspace
                   </Button>
                 </form>
