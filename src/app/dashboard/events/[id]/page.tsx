@@ -57,6 +57,9 @@ function normalizeSingle<T>(value: T | T[] | null): T | null {
 }
 
 export default async function EventDetailPage({ params }: EventPageProps) {
+  // Next.js 15: params is now a Promise
+  const { id } = await params
+
   const supabase = await createSupabaseServerClient()
   const { data: userData } = await supabase.auth.getUser()
   const user = userData.user
@@ -106,7 +109,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         )
       `
     )
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("org_id", activeOrgId)
     .single()
 
@@ -130,7 +133,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         `
       )
       .eq("linked_type", "event")
-      .eq("linked_id", params.id)
+      .eq("linked_id", id)
       .eq("org_id", activeOrgId),
     supabase
       .from("event_skill_links")
@@ -140,7 +143,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           skills (id, name, description, color)
         `
       )
-      .eq("event_id", params.id)
+      .eq("event_id", id)
       .eq("org_id", activeOrgId),
     supabase
       .from("tasks")
@@ -159,7 +162,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           )
         `
       )
-      .eq("event_id", params.id)
+      .eq("event_id", id)
       .eq("org_id", activeOrgId)
       .order("created_at", { ascending: false }),
     supabase.rpc("has_permission", {
