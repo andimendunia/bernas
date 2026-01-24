@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export default async function DashboardLayout({
@@ -78,7 +79,9 @@ export default async function DashboardLayout({
         activeOrgId={metadata.active_org_id ?? null}
         isAdmin={isAdminData === true}
       />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        <TooltipProvider>{children}</TooltipProvider>
+      </SidebarInset>
     </SidebarProvider>
   )
 }

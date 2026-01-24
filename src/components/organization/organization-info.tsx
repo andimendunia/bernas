@@ -31,6 +31,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { Member } from "@/lib/permissions"
 import { MemberRoleDialog } from "@/components/members/member-role-dialog"
 import { RemoveMemberDialog } from "@/components/members/remove-member-dialog"
@@ -164,6 +169,7 @@ export function OrganizationInfo({
         const skills = memberSkills
           .filter((ms) => ms.member_id === member.id)
           .map((ms) => ms.skill)
+        const remainingSkills = skills.slice(3)
         
         if (skills.length === 0) {
           return <span className="text-sm text-muted-foreground">—</span>
@@ -176,10 +182,23 @@ export function OrganizationInfo({
                 {skill.name}
               </Badge>
             ))}
-            {skills.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{skills.length - 3}
-              </Badge>
+            {remainingSkills.length > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant="outline" className="text-xs">
+                    +{remainingSkills.length}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-64">
+                  <div className="flex flex-wrap gap-1">
+                    {remainingSkills.map((skill) => (
+                      <Badge key={skill.id} variant="outline" className="text-xs">
+                        {skill.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         )
