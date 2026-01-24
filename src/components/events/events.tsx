@@ -328,11 +328,12 @@ export function Events({
                               <MoreVertical className="size-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                           {canEdit && (
                             <>
                               <DropdownMenuItem
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation()
                                   setSelectedEvent(event)
                                   setEditDialogOpen(true)
                                 }}
@@ -340,7 +341,8 @@ export function Events({
                                 Edit Event
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation()
                                   setSelectedEvent(event)
                                   setManageResourcesDialogOpen(true)
                                 }}
@@ -348,7 +350,8 @@ export function Events({
                                 Manage Resources
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation()
                                   setSelectedEvent(event)
                                   setManageSkillsDialogOpen(true)
                                 }}
@@ -361,12 +364,13 @@ export function Events({
                           {canDelete && (
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation()
                                 setSelectedEvent(event)
                                 setDeleteDialogOpen(true)
                               }}
                             >
-                              Delete
+                              Delete Event
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
