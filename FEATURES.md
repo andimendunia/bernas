@@ -89,75 +89,75 @@ Members declare their availability/intent to participate in events.
 - Remove members (with permission)
 - Member profiles showing user info and assigned role
 
-### ✅ Events (Planned - Schema Ready)
-- Event creation with name, description, dates
-- Tag assignment
+### ✅ Events & Tasks
+- Event creation, editing, deletion with name, description, dates
+- Tag assignment to events
 - Task management within events
-- (UI implementation pending)
+- Three view modes: List, Table (sortable), Kanban (drag columns)
+- Task creation with assignee, deadline, status, skill requirements
+- Task assignment with smart suggestions (participants first, skill matching)
+- Task filtering and search
+- Event participation tracking (interested, confirmed, declined)
+- Event detail pages with tasks section
+- Organization-wide tasks view (`/{org}/tasks`)
+- Personal tasks view (`/{org}/tasks/mine`)
 
-### ✅ Tags (Schema Ready)
-- Organizational tag system
-- Used for events, resources, and skills
-- (Full CRUD UI pending)
+### ✅ Tags System
+- UPPERCASE tag system for categorization
+- Tag creation and management with color picker
+- Applied to events and resources
+- Filter events and resources by tags
+- Tag badges with custom colors
+
+### ✅ Resources Library
+- Centralized resource repository
+- Google Docs URLs, external links, file uploads
+- Resource tagging for categorization
+- Many-to-many event attachments
+- Resource search and filtering
+- Description and metadata tracking
+
+### ✅ Skills System
+- lowercase skills (separate from tags)
+- Member skill assignments (self-service)
+- Event skill requirements
+- Task skill requirements
+- Skill matching in assignee suggestions
+- Skill highlighting in dropdowns
+- Organization-wide skills management page
 
 ### ✅ Authentication & Onboarding
-- Google OAuth (production) / Magic link (local dev)
+- Google OAuth (production) / Password + Magic link (local dev)
 - Onboarding flow: Create organization OR Join existing
-- User metadata tracking (onboarded status, active organization)
+- App metadata auto-update via database triggers
+- Organization slug-based routing
+- Active organization switching
 
 ---
 
-## In Development Features
+## Planned Features
 
-### 🚧 Resources Module
-**Problem Solved**: Documents and links scattered across members' Google accounts, shared via group chat, difficult to discover.
+### 📊 Dashboard & Analytics
+- Upcoming events overview
+- My assigned tasks summary
+- Organization activity feed
+- Event participation statistics
+- Task completion metrics
 
-**Solution**: Centralized resource library with event attachments.
+### 🔔 Notifications
+- Task assignment notifications
+- Event reminders
+- Join request notifications (for admins)
+- Participation deadline reminders
+- Task deadline alerts
 
-**Specifications:**
-- **Resource Types**: Google Docs URLs, external links, uploaded files (later)
-- **Organization-wide Library**: All resources visible in one place
-- **Event Attachments**: Many-to-many relationship (one resource can be attached to multiple events)
-- **Tagging**: Uses same tag system as events (e.g., "Fundraising", "Podcast")
-- **Metadata**: Title, URL, description, tags, created_by, created_at
-- **Discovery**: List view with filters (by tag, by event, by search)
-- **Permissions**: 
-  - `resources.create` - Create resources
-  - `resources.edit` - Edit any resource
-  - `resources.delete` - Delete any resource
-  - (Default role can create their own, view all)
+### 📅 Calendar Integration
+- Calendar view of all events
+- Personal calendar with assigned tasks
+- ICS export for external calendars
+- Deadline visualization
 
-**UI Location**: Sidebar → Resources (replaces "Repository")
-
-**User Stories:**
-- As a member, I can add a Google Doc link as a resource with tags
-- As a member, I can attach an existing resource to multiple events
-- As a member, I can filter resources by tag or event to find what I need
-- As an event coordinator, I can see all resources attached to my event
-
----
-
-### 🚧 Skills System
-**Problem Solved**: Organizational roles don't reflect practical reality. Members have multiple competencies (e.g., Secretary + Merch + Podcast editing) but no way to document or discover "who can do what."
-
-**Solution**: Skill system that documents member competencies and matches people to work.
-
-**Specifications:**
-- **Separate from Tags**: Skills are independent entities (NOT the same as event/resource tags)
-- **Naming Convention**: lowercase, no spaces, can use hyphens (e.g., "audio-editing", "grant-writing")
-- **Self-Service Creation**: Anyone can create new skills organization-wide
-- **Self-Assignment**: Members can assign/remove skills for themselves
-- **Skill Attachments**:
-  - **Members**: Who has this skill
-  - **Events**: This event needs these skills (helps find who can help)
-  - **Tasks**: This task needs these skills (suggests assignees)
-- **Permissions (Default Role)**:
-  - Create skills: ✅ (everyone)
-  - Assign skills to self: ✅
-  - Remove skills from self: ✅
-  - Edit/delete skills: ❌ (requires permission)
-  - Assign/remove skills for others: ❌ (requires permission)
-- **Discovery**: 
+### 🔍 Advanced Search & Filters 
   - Dedicated Skills page showing all skills with member avatars
   - Skills visible on member profiles
   - Skills shown in members table (badge list)
@@ -182,35 +182,11 @@ Members declare their availability/intent to participate in events.
 - As a member, I can browse the Skills page to see who can help with what
 - As an admin, I can assign skills to members who may not self-identify
 
----
-
-## Planned Features
-
-### 📋 Events & Tasks (Full Implementation)
-- Event creation UI with form
-- Event detail pages
-- Task creation and assignment within events
-- Task status tracking
-- Calendar view of events
-- Event-resource attachment UI
-- Participation intent tracking UI
-
-### 📊 Dashboard & Analytics
-- Upcoming events overview
-- My assigned tasks
-- Organization activity feed
-- Event participation statistics
-
-### 🔔 Notifications
-- Task assignments
-- Event reminders
-- Join request notifications (for admins)
-- Participation reminders
-
-### 🔍 Advanced Search
-- Cross-feature search (events, resources, members, tasks)
-- Advanced filters
+### 🔍 Advanced Search & Filters
+- Global search across events, resources, members, tasks
+- Advanced filtering options
 - Saved searches
+- Search history
 
 ---
 
@@ -263,23 +239,27 @@ See [PATTERNS.md](./PATTERNS.md) for detailed code patterns and examples.
 
 ## Roadmap Priority
 
-### Phase 1 (Current)
+### Phase 1 (✅ Complete)
 - ✅ Organization & member management
 - ✅ Roles & permissions system
-- 🚧 Resources module
-- 🚧 Skills system
+- ✅ Resources module
+- ✅ Skills system
+- ✅ Events & tasks full implementation
+- ✅ Event-resource attachment
+- ✅ Participation tracking
 
-### Phase 2
-- Events UI (create, view, edit)
-- Tasks UI (create, assign, track)
-- Event-resource attachment
-- Participation tracking
-
-### Phase 3
+### Phase 2 (Current)
 - Dashboard & analytics
-- Notifications
-- Advanced search
-- Mobile optimization
+- Calendar integration
+- Notifications system
+- Advanced search & filters
+
+### Phase 3 (Future)
+- Mobile app
+- Integrations (Google Calendar, Slack, etc.)
+- Advanced reporting
+- Bulk operations
+- Export/import functionality
 
 ---
 

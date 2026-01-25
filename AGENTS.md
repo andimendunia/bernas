@@ -33,10 +33,11 @@
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY=<local publishable key from supabase start output>`
 
 ## Auth flow
-- Sign-in: `/auth/sign-in` (Google OAuth in hosted; magic link in local).
+- Sign-in: `/auth/sign-in` (Google OAuth in hosted; password auth + magic link in local).
 - Callback: `/auth/callback`
 - Sign-out: `/auth/sign-out`
-- Local magic link: use Mailpit to open the email.
+- **Local dev**: Password authentication enabled by default (toggle to magic link at bottom of form).
+- Local magic link: use Mailpit (http://127.0.0.1:54324) to open the email.
 
 ## Supabase schema + RLS
 

@@ -363,6 +363,42 @@ const [members, roles, permissions] = await Promise.all([
 ])
 ```
 
+### PostgREST Cross-Schema Joins (Important)
+
+**Problem**: PostgREST cannot automatically join tables across schemas (e.g., `public.org_members` → `auth.users`).
+
+❌ **Anti-pattern**: Embedding users in queries
+```typescript
+// BAD: This will fail silently with PGRST200 error
+const { data: tasks } = await supabase
+  .from("tasks")
+  .select(`
+    id, title,
+    org_members (
+      id,
+      users (email, user_metadata)  // ❌ Can't cross schemas
+    )
+  `)
+```
+
+✅ **Correct**: Fetch separately and join in memory
+```typescript
+// GOOD: Use helper function + in-memory join
+const tasks = await supabase
+  .from("tasks")
+  .select(`id, title, assignee_member_id, org_members (id, user_id)`)
+
+const orgMembers = await getOrgMembers(orgId)  // Uses admin API
+const membersById = new Map(orgMembers.map(m => [m.id, m]))
+
+const enrichedTasks = tasks.data.map(task => ({
+  ...task,
+  org_members: membersById.get(task.assignee_member_id)
+}))
+```
+
+**Why**: `auth.users` is in a separate schema that PostgREST doesn't expose. Use `getOrgMembers()` helper which leverages Supabase Admin API to properly fetch user data.
+
 ---
 
 ## 4. Form Patterns

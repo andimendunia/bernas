@@ -269,6 +269,76 @@ This drops everything and re-seeds with fresh test data.
 
 ---
 
+## 🔐 Onboarding Flow Tests
+
+### H. Create New Organization (Fresh User)
+
+**Test: User onboarding with new organization**
+
+1. Sign out if logged in: http://localhost:3000/auth/sign-out
+2. Sign in with magic link:
+   - Email: `newuser@test.com`
+   - Check Mailpit: http://127.0.0.1:54324
+   - Click magic link
+3. **Expected**: Redirect to `/onboarding`
+4. Click "Create organization" tab
+5. Enter org name: `Test Organization`
+6. Slug auto-suggested: `test-organization` (editable)
+7. Choose emoji and color
+8. Click "Create workspace"
+9. **Expected**: 
+   - Redirect to `/test-organization/overview`
+   - Database trigger updates `app_metadata`
+   - User can switch between orgs
+
+**Verify in database:**
+```bash
+psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c "
+SELECT 
+  email,
+  raw_app_meta_data->>'onboarded' as onboarded,
+  raw_app_meta_data->>'last_visited_org_slug' as slug
+FROM auth.users 
+WHERE email = 'newuser@test.com';
+"
+```
+
+### I. Join Existing Organization
+
+**Test: Join request workflow**
+
+1. Get join code from existing org:
+   - Sign in as Alice: `alice@test.com / password123`
+   - Go to: http://localhost:3000/ruang-baca-dino
+   - Copy join code: `BERNAS-DINO01`
+2. Sign out and sign in as new user:
+   - Email: `joinuser@test.com`
+   - Should redirect to onboarding
+3. Click "Join with code" tab
+4. Enter code: `BERNAS-DINO01`
+5. Click "Join workspace"
+6. **Expected**: "Join Request Sent!" dialog
+7. Approve request (as admin):
+   - Sign in as Alice
+   - Go to: http://localhost:3000/ruang-baca-dino/administration
+   - Click "Approve" for `joinuser@test.com`
+8. Sign in as joined user
+9. **Expected**: Redirect to `/ruang-baca-dino/overview`
+
+### J. Switch Between Organizations
+
+**Test: Multi-org navigation**
+
+1. Sign in as user with multiple orgs
+2. Click organization switcher in sidebar
+3. Switch from current org to another
+4. **Expected**: 
+   - Navigate to new org overview
+   - `app_metadata.active_org_id` updated
+   - `app_metadata.last_visited_org_slug` updated
+
+---
+
 ## 📊 Test Data Summary
 
 ### Events
