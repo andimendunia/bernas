@@ -165,20 +165,21 @@ export function EditTaskDialog({
     setSkillSearch("")
   }, [dialogOpen, task])
 
-  const participants = React.useMemo(() => {
-    return participations.filter(
-      (participation) =>
-        participation.status === "full" || participation.status === "partial"
-    )
+  const participationMap = React.useMemo(() => {
+    return new Map(participations.map((p) => [p.member_id, p.status]))
   }, [participations])
 
-  const participantMemberIds = React.useMemo(() => {
-    return new Set(participants.map((participation) => participation.member_id))
-  }, [participants])
+  const getParticipationStatus = React.useCallback(
+    (memberId: string) => participationMap.get(memberId) ?? null,
+    [participationMap]
+  )
 
   const isParticipant = React.useCallback(
-    (memberId: string) => participantMemberIds.has(memberId),
-    [participantMemberIds]
+    (memberId: string) => {
+      const status = participationMap.get(memberId)
+      return status === "full" || status === "partial"
+    },
+    [participationMap]
   )
 
   const allMembersWithSkills = allMembers as MemberWithSkills[]
@@ -229,70 +230,83 @@ export function EditTaskDialog({
   }, [filteredSkills, selectedSkills])
 
   const searchValue = normalizeSearch(assigneeSearch)
-  const participantMembers = allMembersWithSkills.filter((member) =>
-    participantMemberIds.has(member.id)
-  )
-  const nonParticipantMembers = allMembersWithSkills.filter(
-    (member) => !participantMemberIds.has(member.id)
-  )
 
-  const filteredParticipants = participantMembers.filter((member) => {
-    if (!searchValue) return true
-    const name = normalizeSearch(getMemberName(member))
-    const email = normalizeSearch(getMemberEmail(member))
-    return name.includes(searchValue) || email.includes(searchValue)
-  })
+  // Categorize members into exclusive sections (no duplicates)
+  const categorizedMembers = React.useMemo(() => {
+    const hasSkills: MemberWithSkills[] = []
+    const participating: MemberWithSkills[] = []
+    const others: MemberWithSkills[] = []
+    const notParticipating: MemberWithSkills[] = []
 
-  const filteredNonParticipants = nonParticipantMembers.filter((member) => {
-    if (!searchValue) return selectedMemberId === member.id
-    const name = normalizeSearch(getMemberName(member))
-    const email = normalizeSearch(getMemberEmail(member))
-    return name.includes(searchValue) || email.includes(searchValue)
-  })
+    allMembersWithSkills.forEach((member) => {
+      const participationStatus = getParticipationStatus(member.id)
+      const hasRequiredSkills = memberHasRequiredSkills(member.id)
 
-  const showAllMembersSection =
-    (searchValue.length > 0 && filteredNonParticipants.length > 0) ||
-    (selectedMemberId !== null && !isParticipant(selectedMemberId))
+      // Priority 1: Has required skills (but NOT declined)
+      if (hasRequiredSkills && participationStatus !== "declined") {
+        hasSkills.push(member)
+      }
+      // Priority 2: Participating (full/partial) without skill match
+      else if (participationStatus === "full" || participationStatus === "partial") {
+        participating.push(member)
+      }
+      // Priority 3: Not participating (declined)
+      else if (participationStatus === "declined") {
+        notParticipating.push(member)
+      }
+      // Priority 4: Other members (no participation record)
+      else {
+        others.push(member)
+      }
+    })
 
-  const showUnassignedOption =
-    !searchValue || "unassigned".includes(searchValue)
-  const hasParticipantResults =
-    showUnassignedOption || filteredParticipants.length > 0
-  const hasNonParticipantResults =
-    showAllMembersSection && filteredNonParticipants.length > 0
-  const hasAnyAssigneeResults = hasParticipantResults || hasNonParticipantResults
+    return { hasSkills, participating, others, notParticipating }
+  }, [allMembersWithSkills, getParticipationStatus, memberHasRequiredSkills])
+
+  // Apply search filter to each category
+  const filterMembers = (members: MemberWithSkills[]) => {
+    if (!searchValue) return members
+    return members.filter((member) => {
+      const name = normalizeSearch(getMemberName(member))
+      const email = normalizeSearch(getMemberEmail(member))
+      return name.includes(searchValue) || email.includes(searchValue)
+    })
+  }
+
+  const filteredHasSkills = filterMembers(categorizedMembers.hasSkills)
+  const filteredParticipating = filterMembers(categorizedMembers.participating)
+  const filteredOthers = filterMembers(categorizedMembers.others)
+  const filteredNotParticipating = filterMembers(categorizedMembers.notParticipating)
+
+  const showUnassignedOption = !searchValue || "unassigned".includes(searchValue)
+  const hasAnyAssigneeResults =
+    showUnassignedOption ||
+    filteredHasSkills.length > 0 ||
+    filteredParticipating.length > 0 ||
+    filteredOthers.length > 0 ||
+    filteredNotParticipating.length > 0
 
   const unassignedOption: AssigneeOption = React.useMemo(
     () => ({ id: "unassigned", label: "Unassigned", member: null, isParticipant: true }),
     []
   )
 
-  const participantOptions = React.useMemo<AssigneeOption[]>(
-    () =>
-      participantMembers.map((member) => ({
+  const assigneeOptions = React.useMemo<AssigneeOption[]>(() => {
+    const allOptions: AssigneeOption[] = [unassignedOption]
+    
+    // Add all members as options
+    allMembersWithSkills.forEach((member) => {
+      const participationStatus = getParticipationStatus(member.id)
+      allOptions.push({
         id: member.id,
         label: getMemberName(member),
         member,
-        isParticipant: true,
-      })),
-    [participantMembers]
-  )
-
-  const nonParticipantOptions = React.useMemo<AssigneeOption[]>(
-    () =>
-      nonParticipantMembers.map((member) => ({
-        id: member.id,
-        label: getMemberName(member),
-        member,
-        isParticipant: false,
-      })),
-    [nonParticipantMembers]
-  )
-
-  const assigneeOptions = React.useMemo(
-    () => [unassignedOption, ...participantOptions, ...nonParticipantOptions],
-    [unassignedOption, participantOptions, nonParticipantOptions]
-  )
+        isParticipant: participationStatus === "full" || participationStatus === "partial",
+      })
+    })
+    
+    return allOptions
+  }, [unassignedOption, allMembersWithSkills, getParticipationStatus])
 
   const assigneeOptionMap = React.useMemo(() => {
     return new Map(assigneeOptions.map((option) => [option.id, option]))
@@ -425,23 +439,19 @@ export function EditTaskDialog({
               onInputValueChange={(value) => setAssigneeSearch(value)}
               autoHighlight
             >
-              <ComboboxChips ref={assigneeAnchorRef} className="mb-3">
-                <ComboboxValue>
-                  {(value: AssigneeOption | AssigneeOption[] | null) => {
-                    const values = Array.isArray(value) ? value : value ? [value] : []
-                    return (
-                      <React.Fragment>
-                        {values.map((option) => (
-                          <ComboboxChip key={option.id}>
-                            {option.label}
-                          </ComboboxChip>
-                        ))}
-                        <ComboboxChipsInput placeholder="Search members..." />
-                      </React.Fragment>
-                    )
-                  }}
-                </ComboboxValue>
-              </ComboboxChips>
+              <div ref={assigneeAnchorRef}>
+                <Input
+                  placeholder="Search members..."
+                  value={assigneeSearch}
+                  onChange={(e) => setAssigneeSearch(e.target.value)}
+                  className="w-full"
+                />
+                {selectedAssignee && !assigneeSearch && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    Selected: <span className="font-medium text-foreground">{selectedAssignee.label}</span>
+                  </div>
+                )}
+              </div>
 
               <ComboboxContent anchor={assigneeAnchorRef}>
                 {!hasAnyAssigneeResults ? (
@@ -450,53 +460,64 @@ export function EditTaskDialog({
                   </div>
                 ) : (
                   <ComboboxList>
-                    {hasParticipantResults && (
+                    {showUnassignedOption && (
+                      <ComboboxItem value={unassignedOption}>Unassigned</ComboboxItem>
+                    )}
+
+                    {filteredHasSkills.length > 0 && (
                       <ComboboxGroup>
-                        <ComboboxLabel>Participants</ComboboxLabel>
-                        {showUnassignedOption && (
-                          <ComboboxItem value={unassignedOption}>Unassigned</ComboboxItem>
-                        )}
-                        {filteredParticipants.map((member) => {
+                        <ComboboxLabel>Has Required Skills</ComboboxLabel>
+                        {filteredHasSkills.map((member) => {
                           const option = assigneeOptionMap.get(member.id)
                           if (!option) return null
                           return (
                             <ComboboxItem key={member.id} value={option}>
-                              <div className="flex w-full items-center justify-between gap-2">
-                                <span>{getMemberName(member)}</span>
-                                {memberHasRequiredSkills(member.id) && (
-                                  <Badge
-                                    variant="outline"
-                                    className="border-[#df7f80]/40 text-[#df7f80] text-xs"
-                                  >
-                                    Skill match
-                                  </Badge>
-                                )}
-                              </div>
+                              {getMemberName(member)}
                             </ComboboxItem>
                           )
                         })}
                       </ComboboxGroup>
                     )}
 
-                    {hasNonParticipantResults && (
+                    {filteredParticipating.length > 0 && (
                       <ComboboxGroup>
-                        <ComboboxLabel>All members</ComboboxLabel>
-                        {filteredNonParticipants.map((member) => {
+                        <ComboboxLabel>Participating</ComboboxLabel>
+                        {filteredParticipating.map((member) => {
                           const option = assigneeOptionMap.get(member.id)
                           if (!option) return null
                           return (
                             <ComboboxItem key={member.id} value={option}>
-                              <div className="flex w-full items-center justify-between gap-2">
-                                <span>{getMemberName(member)}</span>
-                                {memberHasRequiredSkills(member.id) && (
-                                  <Badge
-                                    variant="outline"
-                                    className="border-[#df7f80]/40 text-[#df7f80] text-xs"
-                                  >
-                                    Skill match
-                                  </Badge>
-                                )}
-                              </div>
+                              {getMemberName(member)}
+                            </ComboboxItem>
+                          )
+                        })}
+                      </ComboboxGroup>
+                    )}
+
+                    {filteredOthers.length > 0 && (
+                      <ComboboxGroup>
+                        <ComboboxLabel>Other Members</ComboboxLabel>
+                        {filteredOthers.map((member) => {
+                          const option = assigneeOptionMap.get(member.id)
+                          if (!option) return null
+                          return (
+                            <ComboboxItem key={member.id} value={option}>
+                              {getMemberName(member)}
+                            </ComboboxItem>
+                          )
+                        })}
+                      </ComboboxGroup>
+                    )}
+
+                    {filteredNotParticipating.length > 0 && (
+                      <ComboboxGroup>
+                        <ComboboxLabel>Not Participating</ComboboxLabel>
+                        {filteredNotParticipating.map((member) => {
+                          const option = assigneeOptionMap.get(member.id)
+                          if (!option) return null
+                          return (
+                            <ComboboxItem key={member.id} value={option}>
+                              {getMemberName(member)}
                             </ComboboxItem>
                           )
                         })}
