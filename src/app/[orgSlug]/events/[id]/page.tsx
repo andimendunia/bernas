@@ -232,6 +232,23 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     .map((link: SkillLinkRow) => normalizeSingle(link.skills))
     .filter(Boolean) as EventSkill[]
 
+  // Fetch member skills for skill matching in task assignment
+  const { data: memberSkillsResult } = await supabase
+    .from("member_skills")
+    .select("member_id, skill_id, skills (id, name)")
+    .eq("org_id", activeOrgId)
+
+  const memberSkillsMap = new Map<string, Array<{ skill_id: string; skills: { id: string; name: string } }>>()
+  memberSkillsResult?.forEach((ms: any) => {
+    if (!memberSkillsMap.has(ms.member_id)) {
+      memberSkillsMap.set(ms.member_id, [])
+    }
+    memberSkillsMap.get(ms.member_id)!.push({
+      skill_id: ms.skill_id,
+      skills: ms.skills
+    })
+  })
+
   const allMembers = (orgMembersResult ?? []).map((member) => ({
     id: member.id,
     user_id: member.user_id,
@@ -240,6 +257,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
       email: member.user.email ?? null,
       user_metadata: member.user.user_metadata ?? null,
     },
+    member_skills: memberSkillsMap.get(member.id) ?? [],
   })) as EventOrgMember[]
 
   const membersById = new Map(allMembers.map((member) => [member.id, member]))

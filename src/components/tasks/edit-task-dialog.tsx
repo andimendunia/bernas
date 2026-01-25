@@ -62,14 +62,7 @@ type EditTaskDialogProps = {
   hideTrigger?: boolean
 }
 
-type MemberWithSkills = EventOrgMember & {
-  member_skills?: Array<{
-    skill_id?: string
-    skill?: { id: string }
-    skills?: { id: string }
-  }>
-  skills?: Array<{ id: string }>
-}
+type MemberWithSkills = EventOrgMember
 
 type AssigneeOption = {
   id: string
@@ -108,16 +101,6 @@ const extractMemberSkillIds = (member: MemberWithSkills) => {
     if (typeof skillLink.skill_id === "string") {
       ids.push(skillLink.skill_id)
     }
-    if (skillLink.skill && typeof skillLink.skill.id === "string") {
-      ids.push(skillLink.skill.id)
-    }
-    if (skillLink.skills && typeof skillLink.skills.id === "string") {
-      ids.push(skillLink.skills.id)
-    }
-  })
-
-  member.skills?.forEach((skill) => {
-    if (typeof skill.id === "string") ids.push(skill.id)
   })
 
   return Array.from(new Set(ids))
@@ -278,21 +261,14 @@ export function EditTaskDialog({
   const filteredOthers = filterMembers(categorizedMembers.others)
   const filteredNotParticipating = filterMembers(categorizedMembers.notParticipating)
 
-  const showUnassignedOption = !searchValue || "unassigned".includes(searchValue)
   const hasAnyAssigneeResults =
-    showUnassignedOption ||
     filteredHasSkills.length > 0 ||
     filteredParticipating.length > 0 ||
     filteredOthers.length > 0 ||
     filteredNotParticipating.length > 0
 
-  const unassignedOption: AssigneeOption = React.useMemo(
-    () => ({ id: "unassigned", label: "Unassigned", member: null, isParticipant: true }),
-    []
-  )
-
   const assigneeOptions = React.useMemo<AssigneeOption[]>(() => {
-    const allOptions: AssigneeOption[] = [unassignedOption]
+    const allOptions: AssigneeOption[] = []
     
     // Add all members as options
     allMembersWithSkills.forEach((member) => {
@@ -306,22 +282,24 @@ export function EditTaskDialog({
     })
     
     return allOptions
-  }, [unassignedOption, allMembersWithSkills, getParticipationStatus])
+  }, [allMembersWithSkills, getParticipationStatus])
 
   const assigneeOptionMap = React.useMemo(() => {
     return new Map(assigneeOptions.map((option) => [option.id, option]))
   }, [assigneeOptions])
 
-  const selectedAssignee =
-    selectedMemberId ? assigneeOptionMap.get(selectedMemberId) ?? null : null
+  const selectedAssignee = selectedMemberId 
+    ? [assigneeOptionMap.get(selectedMemberId)].filter(Boolean) as AssigneeOption[]
+    : []
 
-  const handleAssigneeChange = (next: AssigneeOption | null) => {
-    if (!next || next.id === "unassigned") {
+  const handleAssigneeChange = (next: AssigneeOption[] | null) => {
+    const nextArray = next ?? []
+    if (nextArray.length === 0) {
       setSelectedMemberId(null)
       setAssigneeSearch("")
       return
     }
-    setSelectedMemberId(next.id)
+    setSelectedMemberId(nextArray[0].id)
     setAssigneeSearch("")
   }
 
@@ -432,6 +410,7 @@ export function EditTaskDialog({
             <Label>Assignee (optional)</Label>
             <Combobox
               items={assigneeOptions}
+              multiple
               value={selectedAssignee}
               onValueChange={handleAssigneeChange}
               isItemEqualToValue={(option, selected) => option.id === selected.id}
@@ -441,21 +420,18 @@ export function EditTaskDialog({
             >
               <ComboboxChips ref={assigneeAnchorRef}>
                 <ComboboxValue>
-                  {(value: AssigneeOption | AssigneeOption[] | null) => {
-                    const current = Array.isArray(value) ? value[0] : value
-                    return (
-                      <React.Fragment>
-                        {current && (
-                          <ComboboxChip>
-                            {current.label}
-                          </ComboboxChip>
-                        )}
-                        {!current && (
-                          <ComboboxChipsInput placeholder="Search members..." />
-                        )}
-                      </React.Fragment>
-                    )
-                  }}
+                  {(values: AssigneeOption[]) => (
+                    <React.Fragment>
+                      {values.map((option) => (
+                        <ComboboxChip key={option.id}>
+                          {option.label}
+                        </ComboboxChip>
+                      ))}
+                      {values.length === 0 && (
+                        <ComboboxChipsInput placeholder="Search members..." />
+                      )}
+                    </React.Fragment>
+                  )}
                 </ComboboxValue>
               </ComboboxChips>
 
@@ -466,10 +442,6 @@ export function EditTaskDialog({
                   </div>
                 ) : (
                   <ComboboxList>
-                    {showUnassignedOption && (
-                      <ComboboxItem value={unassignedOption}>Unassigned</ComboboxItem>
-                    )}
-
                     {filteredHasSkills.length > 0 && (
                       <ComboboxGroup>
                         <ComboboxLabel>Has Required Skills</ComboboxLabel>

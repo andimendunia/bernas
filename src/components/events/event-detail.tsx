@@ -64,6 +64,10 @@ export type EventOrgMember = {
   id: string
   user_id: string
   users: EventUser | null
+  member_skills?: Array<{
+    skill_id: string
+    skills: { id: string; name: string }
+  }>
 }
 
 export type EventTask = {
