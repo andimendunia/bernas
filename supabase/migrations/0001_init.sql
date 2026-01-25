@@ -70,6 +70,7 @@ create table public.tasks (
   org_id uuid not null references public.organizations(id) on delete cascade,
   event_id uuid references public.events(id) on delete set null,
   title text not null,
+  description text,
   status public.task_status not null default 'todo',
   deadline timestamptz,
   assignee_member_id uuid references public.org_members(id) on delete set null,
@@ -83,7 +84,7 @@ create table public.event_participations (
   org_id uuid not null references public.organizations(id) on delete cascade,
   event_id uuid not null references public.events(id) on delete cascade,
   member_id uuid not null references public.org_members(id) on delete cascade,
-  status public.participation_status not null,
+  status public.participation_status,
   notes text,
   created_at timestamptz not null default now(),
   unique (event_id, member_id)
