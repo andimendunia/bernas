@@ -157,7 +157,7 @@ npx supabase@latest start
 # Hentikan Supabase lokal
 npx supabase@latest stop
 
-# Reset database (terapkan migrasi)
+# Reset database (terapkan migrasi + seed data)
 npx supabase@latest db reset
 ```
 
@@ -166,11 +166,43 @@ npx supabase@latest db reset
 - **Supabase Studio**: http://127.0.0.1:54323
 - **Mailpit** (email lokal): http://127.0.0.1:54324
 
+## 🧪 Testing dengan Data Seed
+
+Database sudah dilengkapi dengan data testing komprehensif untuk development lokal:
+
+```bash
+# Reset database dan load data seed
+npx supabase db reset
+```
+
+**Test Accounts** (Password: `password123`):
+- `alice@test.com` - Admin (semua izin)
+- `bob@test.com` - Coordinator (bisa create/edit)
+- `charlie@test.com` - Member (izin terbatas)
+- `diana@test.com` - Member (untuk testing skill)
+- `eve@test.com` - Belum onboarding
+
+**Data Seed Includes:**
+- 1 organisasi (Ruang Baca Dino 🦕)
+- 3 acara dengan partisipasi
+- 10 tugas dalam berbagai status
+- 6 keterampilan dengan penugasan anggota
+- 4 tag acara dengan warna
+- 3 sumber daya
+
+**Quick Test URL:**
+```
+http://localhost:3000/ruang-baca-dino/events/e1111111-1111-1111-1111-111111111111
+```
+
+📖 **Panduan Testing Lengkap**: [TESTING_GUIDE.md](./TESTING_GUIDE.md)
+
 ## 📚 Dokumentasi
 
 - **[AGENTS.md](./AGENTS.md)** - Stack teknis, arsitektur, dan pola pengembangan
 - **[FEATURES.md](./FEATURES.md)** - Spesifikasi fitur dan roadmap produk
 - **[PATTERNS.md](./PATTERNS.md)** - Pola kode, best practices, dan konvensi
+- **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - Panduan testing dengan data seed
 
 ## 🎨 Filosofi Desain
 

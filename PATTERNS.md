@@ -371,6 +371,14 @@ const [members, roles, permissions] = await Promise.all([
 
 Forms in Bernas use shadcn Dialog components with single dialogs handling both create and edit modes.
 
+### Sheet-Based Large Selectors
+
+For large lists (resources, skills, tags), use shadcn `Sheet` instead of centered dialogs to avoid layout jitter.
+
+- Right-side sheet, full-width on mobile
+- Search + selected chips + scrollable results
+- Server-side search with pagination for large datasets
+
 ### Dialog-Based Form Pattern
 
 ```typescript
@@ -748,6 +756,11 @@ const isActive = pathname.startsWith(item.url)
 ### Overview
 
 Bernas uses an open design philosophy with minimal borders and consistent spacing.
+
+### Badge Styling
+
+- **Tags**: use `TagBadge` with light tinted background from tag color, no border, smaller text for uppercase.
+- **Skills**: use `SkillBadge` (outline-only, no background) for consistency across lists and cards.
 
 ### Card Usage
 

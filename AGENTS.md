@@ -47,6 +47,9 @@
 4. `0004_user_email_helper.sql` - User email helper function
 5. `0005_resources_skills.sql` - Resources and skills system (skills separate from tags)
 6. `0006_org_slug.sql` - Organization slug system for URL routing (unique, validated, reserved slug blocking)
+7. `0007_user_metadata_trigger.sql` - User app_metadata auto-update trigger, active org management
+8. `0008_resources_description.sql` - Resources description column
+9. `0009_resource_tag_links.sql` - Resource tagging system (links resources to event_tags)
 
 **Key Tables:**
 - `organizations` - Organization data with join codes, avatars, and unique slugs
@@ -78,12 +81,19 @@
   2. **Create**: 
      - User enters org name (slug auto-suggested, editable)
      - Slug validated: 3-50 chars, lowercase, hyphens, no reserved words
-     - Creates org + member record, sets user metadata
+     - Creates org + member record via `create_org_with_member()` RPC
+     - **Database trigger** automatically updates `app_metadata` (onboarded, org_id, active_org_id, last_visited_org_slug)
+     - Frontend refreshes session to get updated metadata
      - Redirects to `/{org_slug}/overview`
-  3. **Join**: Submits join request, shows dialog confirmation, waits for admin approval
-- **Join Request Approval**: Admin approves via `/{org_slug}/administration`
-- **User Metadata**: Sets `onboarded: true`, `org_id`, `active_org_id`, `last_visited_org_slug`
+  3. **Join**: Submits join request via `create_join_request()` RPC, shows dialog confirmation, waits for admin approval
+- **Join Request Approval**: Admin approves via `/{org_slug}/administration`, trigger updates user's `app_metadata`
+- **App Metadata** (stored in `auth.users.raw_app_meta_data`):
+  - `onboarded: true` - Set after joining first organization
+  - `org_id` - First organization joined (never changes)
+  - `active_org_id` - Currently active organization (updates when switching)
+  - `last_visited_org_slug` - For redirect after sign-in (updates when switching)
 - **Slug Validation**: Real-time via `check_slug_available()` RPC (checks format, reserved words, uniqueness)
+- **IMPORTANT**: Always use `app_metadata` for onboarding/org state, NOT `user_metadata`
 
 ## Navigation & Routing
 - **URL Structure**: All routes are scoped to organization slug: `/{org_slug}/*`
