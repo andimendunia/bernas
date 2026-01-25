@@ -40,13 +40,14 @@ export async function GET(request: Request) {
   const { data: userData } = await supabase.auth.getUser()
   const user = userData.user
 
-  // Check if user is onboarded
-  if (!user || !user.user_metadata?.onboarded) {
+  // Check if user is onboarded (stored in app_metadata, not user_metadata)
+  const appMetadata = user?.app_metadata as { onboarded?: boolean; last_visited_org_slug?: string; active_org_id?: string }
+  if (!user || !appMetadata?.onboarded) {
     return NextResponse.redirect(new URL("/onboarding", origin))
   }
 
   // Try to get last visited org slug
-  const lastVisitedSlug = user.user_metadata?.last_visited_org_slug as string | undefined
+  const lastVisitedSlug = appMetadata.last_visited_org_slug
   
   if (lastVisitedSlug) {
     // Redirect to last visited org
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
   }
 
   // Fallback: get first org by active_org_id or fetch from database
-  const activeOrgId = user.user_metadata?.active_org_id as string | undefined
+  const activeOrgId = appMetadata.active_org_id
   
   if (activeOrgId) {
     const { data: org } = await supabase

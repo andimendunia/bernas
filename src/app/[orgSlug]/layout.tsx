@@ -24,7 +24,9 @@ export default async function OrgLayout({
     redirect("/auth/sign-in")
   }
 
-  if (!userData.user.user_metadata?.onboarded) {
+  // Check app_metadata for onboarding status (not user_metadata)
+  const appMetadata = userData.user.app_metadata as { onboarded?: boolean }
+  if (!appMetadata?.onboarded) {
     redirect("/onboarding")
   }
 
@@ -49,13 +51,13 @@ export default async function OrgLayout({
     redirect("/onboarding?error=not-a-member")
   }
 
-  const currentActiveId = userData.user.user_metadata?.active_org_id
+  // Check app_metadata for active org (not user_metadata)
+  const currentActiveId = (userData.user.app_metadata as { active_org_id?: string })?.active_org_id
   if (currentActiveId !== org.id) {
-    await supabase.auth.updateUser({
-      data: {
-        active_org_id: org.id,
-        last_visited_org_slug: orgSlug,
-      },
+    // Update active org via RPC (updates app_metadata, not user_metadata)
+    await supabase.rpc("update_user_active_org", {
+      target_org_id: org.id,
+      target_org_slug: orgSlug,
     })
   }
 

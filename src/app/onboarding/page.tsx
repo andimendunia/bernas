@@ -189,21 +189,11 @@ export default function OnboardingPage() {
       return
     }
 
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: {
-        onboarded: true,
-        org_id: orgData,
-        active_org_id: orgData,
-        last_visited_org_slug: orgSlug,
-      },
-    })
-
-    if (updateError) {
-      setError("Organization created, but onboarding is incomplete.")
-      setLoading(false)
-      return
-    }
-
+    // Metadata is automatically updated by database trigger
+    // Refresh the session to get updated app_metadata
+    await supabase.auth.refreshSession()
+    
+    // Redirect to the new organization
     router.push(`/${orgSlug}/overview`)
   }
 
@@ -244,8 +234,10 @@ export default function OnboardingPage() {
   React.useEffect(() => {
     const checkOnboarding = async () => {
       const { data } = await supabase.auth.getUser()
-      const onboarded = data.user?.user_metadata?.onboarded
-      const lastSlug = data.user?.user_metadata?.last_visited_org_slug
+      // Check app_metadata for onboarding status (not user_metadata)
+      const appMetadata = data.user?.app_metadata as { onboarded?: boolean; last_visited_org_slug?: string }
+      const onboarded = appMetadata?.onboarded
+      const lastSlug = appMetadata?.last_visited_org_slug
 
       if (lastSlug) {
         setLastVisitedSlug(lastSlug)
