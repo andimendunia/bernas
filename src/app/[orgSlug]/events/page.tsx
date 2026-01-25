@@ -97,19 +97,18 @@ export default async function EventsPage({
     .eq("org_id", activeOrgId)
     .order("name")
 
-  // Get all resources
-  const { data: resources } = await supabase
-    .from("resources")
-    .select("id, title, url")
-    .eq("org_id", activeOrgId)
-    .order("title")
+  const skillIds = Array.from(
+    new Set((eventSkillLinksRaw ?? []).map((link: any) => link.skill_id))
+  )
 
-  // Get all skills
-  const { data: skills } = await supabase
-    .from("skills")
-    .select("id, name")
-    .eq("org_id", activeOrgId)
-    .order("name")
+  const { data: skills } = skillIds.length
+    ? await supabase
+        .from("skills")
+        .select("id, name")
+        .eq("org_id", activeOrgId)
+        .in("id", skillIds)
+        .order("name")
+    : { data: [] }
 
   // Check permissions
   const { data: canCreateData } = await supabase.rpc('has_permission', {
@@ -138,7 +137,6 @@ export default async function EventsPage({
           orgSlug={orgSlug}
           events={events}
           tags={tags ?? []}
-          resources={resources ?? []}
           skills={skills ?? []}
           canCreate={canCreateData === true}
           canEdit={canEditData === true}

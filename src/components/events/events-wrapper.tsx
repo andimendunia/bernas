@@ -14,12 +14,6 @@ type EventTagLink = {
   event_tags: Tag
 }
 
-type Resource = {
-  id: string
-  title: string
-  url: string | null
-}
-
 type Skill = {
   id: string
   name: string
@@ -45,7 +39,6 @@ type EventsWrapperProps = {
   orgSlug: string
   events: Event[]
   tags: Tag[]
-  resources: Resource[]
   skills: Skill[]
   canCreate: boolean
   canEdit: boolean

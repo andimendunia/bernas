@@ -11,8 +11,8 @@ import type {
   EventTag,
   EventTagLink,
   EventOrgMember,
-  EventUser,
 } from "@/components/events/event-detail"
+import { getOrgMembers } from "@/lib/permissions-server"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export const metadata = {
@@ -44,12 +44,18 @@ type SkillLinkRow = {
   skills: EventSkill | EventSkill[] | null
 }
 
-type RawOrgMember = Omit<EventOrgMember, "users"> & {
-  users: EventUser | EventUser[] | null
+type RawSkillLink = {
+  skill_id: string
+  skills: EventSkill | EventSkill[] | null
 }
 
-type TaskRow = Omit<EventTask, "org_members"> & {
-  org_members: RawOrgMember | RawOrgMember[] | null
+type TaskRow = Omit<EventTask, "org_members" | "task_skill_links"> & {
+  task_skill_links?: RawSkillLink[]
+}
+
+type ParticipationRow = {
+  member_id: string
+  status: "full" | "partial" | "declined" | null
 }
 
 function normalizeSingle<T>(value: T | T[] | null): T | null {
@@ -109,8 +115,13 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     resourceLinksResult,
     skillLinksResult,
     tasksResult,
+    participationsResult,
+    allSkillsResult,
+    orgMembersResult,
     canEditResult,
     canCreateTasksResult,
+    canEditTasksResult,
+    canDeleteTasksResult,
   ] = await Promise.all([
     supabase
       .from("resource_links")
@@ -138,21 +149,42 @@ export default async function EventDetailPage({ params }: EventPageProps) {
       .select(
         `
           id,
-          name,
+          title,
           description,
           status,
-          due_date,
-          assigned_to,
+          deadline,
+          assignee_member_id,
+          created_at,
+          updated_at,
           org_members (
             id,
-            user_id,
-            users (id, email, user_metadata)
+            user_id
+          ),
+          task_skill_links (
+            skill_id,
+            skills (id, name, description, color)
           )
         `
       )
       .eq("event_id", id)
       .eq("org_id", activeOrgId)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("event_participations")
+      .select(
+        `
+          member_id,
+          status
+        `
+      )
+      .eq("event_id", id)
+      .eq("org_id", activeOrgId),
+    supabase
+      .from("skills")
+      .select("id, name, description, color")
+      .eq("org_id", activeOrgId)
+      .order("name"),
+    getOrgMembers(activeOrgId),
     supabase.rpc("has_permission", {
       check_org_id: activeOrgId,
       permission_name: "events.edit",
@@ -160,6 +192,14 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     supabase.rpc("has_permission", {
       check_org_id: activeOrgId,
       permission_name: "tasks.create",
+    }),
+    supabase.rpc("has_permission", {
+      check_org_id: activeOrgId,
+      permission_name: "tasks.edit",
+    }),
+    supabase.rpc("has_permission", {
+      check_org_id: activeOrgId,
+      permission_name: "tasks.delete",
     }),
   ])
 
@@ -192,20 +232,54 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     .map((link: SkillLinkRow) => normalizeSingle(link.skills))
     .filter(Boolean) as EventSkill[]
 
+  const allMembers = (orgMembersResult ?? []).map((member) => ({
+    id: member.id,
+    user_id: member.user_id,
+    users: {
+      id: member.user_id,
+      email: member.user.email ?? null,
+      user_metadata: member.user.user_metadata ?? null,
+    },
+  })) as EventOrgMember[]
+
+  const membersById = new Map(allMembers.map((member) => [member.id, member]))
+
   const tasks = (tasksResult.data ?? []).map((task: TaskRow) => {
-    const orgMember = normalizeSingle(task.org_members)
-    const userRecord = normalizeSingle<EventUser>(orgMember?.users ?? null)
+    const orgMember = task.assignee_member_id
+      ? membersById.get(task.assignee_member_id) ?? null
+      : null
+
+    const skillLinks = (task.task_skill_links ?? [])
+      .map((link: RawSkillLink) => {
+        const skill = normalizeSingle(link.skills)
+        if (!skill) return null
+        return {
+          skill_id: link.skill_id,
+          skills: skill,
+        }
+      })
+      .filter(Boolean) as Array<{ skill_id: string; skills: EventSkill }>
 
     return {
       ...task,
-      org_members: orgMember
-        ? {
-            ...orgMember,
-            users: userRecord,
-          }
-        : null,
+      org_members: orgMember,
+      task_skill_links: skillLinks,
     }
   }) as EventTask[]
+
+  const participations = (participationsResult.data ?? []).map(
+    (p: ParticipationRow) => {
+      const orgMember = membersById.get(p.member_id) ?? null
+
+      return {
+        member_id: p.member_id,
+        status: p.status,
+        org_members: orgMember,
+      }
+    }
+  )
+
+  const allSkills = allSkillsResult.data ?? []
 
   return (
     <div className="flex flex-1 flex-col">
@@ -220,9 +294,18 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           resources={resources}
           skills={skills}
           tasks={tasks}
+          participations={participations}
+          allMembers={allMembers}
+          eventSkills={skills}
+          allSkills={allSkills}
+          eventId={id}
+          orgId={activeOrgId}
           canEdit={canEditResult.data === true}
           canCreateTasks={canCreateTasksResult.data === true}
+          canEditTasks={canEditTasksResult.data === true}
+          canDeleteTasks={canDeleteTasksResult.data === true}
           orgSlug={orgSlug}
+          currentUserId={user.id}
         />
       </div>
     </div>

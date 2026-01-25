@@ -4,8 +4,9 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Filter, X, Diamond, MoreVertical, FileText } from "lucide-react"
+import { TagBadge } from "@/components/ui/tag-badge"
+import { SkillBadge } from "@/components/ui/skill-badge"
+import { Plus, Search, Filter, X, Diamond, MoreVertical } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +19,6 @@ import {
 import { AddEventDialog } from "./add-event-dialog"
 import { EditEventDialog } from "./edit-event-dialog"
 import { DeleteEventDialog } from "./delete-event-dialog"
-import { ManageEventResourcesDialog } from "./manage-event-resources-dialog"
-import { ManageEventSkillsDialog } from "./manage-event-skills-dialog"
 
 type Tag = {
   id: string
@@ -30,12 +29,6 @@ type Tag = {
 type EventTagLink = {
   tag_id: string
   event_tags: Tag
-}
-
-type Resource = {
-  id: string
-  title: string
-  url: string | null
 }
 
 type Skill = {
@@ -63,7 +56,6 @@ type EventsProps = {
   orgSlug: string
   events: Event[]
   tags: Tag[]
-  resources: Resource[]
   skills: Skill[]
   canCreate: boolean
   canEdit: boolean
@@ -90,7 +82,6 @@ export function Events({
   orgSlug,
   events,
   tags,
-  resources,
   skills,
   canCreate,
   canEdit,
@@ -103,8 +94,6 @@ export function Events({
   const [addDialogOpen, setAddDialogOpen] = React.useState(false)
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
-  const [manageResourcesDialogOpen, setManageResourcesDialogOpen] = React.useState(false)
-  const [manageSkillsDialogOpen, setManageSkillsDialogOpen] = React.useState(false)
   const [selectedEvent, setSelectedEvent] = React.useState<Event | null>(null)
 
   // Filter events
@@ -218,15 +207,15 @@ export function Events({
             const tag = tags.find((t) => t.id === tagId)
             if (!tag) return null
             return (
-              <Badge
+              <TagBadge
                 key={tagId}
-                variant="secondary"
+                tagColor={tag.color}
                 className="cursor-pointer"
                 onClick={() => toggleTag(tagId)}
               >
                 {tag.name}
                 <X className="ml-1 size-3" />
-              </Badge>
+              </TagBadge>
             )
           })}
         </div>
@@ -289,29 +278,18 @@ export function Events({
                       {eventTags.length > 0 && (
                         <>
                           <span className="text-muted-foreground">•</span>
-                          {eventTags.map((tag) => (
-                            <Badge key={tag.id} variant="outline">
-                              {tag.name}
-                            </Badge>
-                          ))}
-                        </>
-                      )}
-                      {event.resource_link_ids.length > 0 && (
-                        <>
-                          <span className="text-muted-foreground">•</span>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <FileText className="size-4" />
-                            <span>{event.resource_link_ids.length}</span>
-                          </div>
+                            {eventTags.map((tag) => (
+                              <TagBadge key={tag.id} tagColor={tag.color}>
+                                {tag.name}
+                              </TagBadge>
+                            ))}
                         </>
                       )}
                       {eventSkills.length > 0 && (
                         <>
                           <span className="text-muted-foreground">•</span>
                           {eventSkills.map((skill) => (
-                            <Badge key={skill.id} variant="secondary">
-                              {skill.name}
-                            </Badge>
+                            <SkillBadge key={skill.id}>{skill.name}</SkillBadge>
                           ))}
                         </>
                       )}
@@ -341,24 +319,6 @@ export function Events({
                                 }}
                               >
                                 Edit Event
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedEvent(event)
-                                  setManageResourcesDialogOpen(true)
-                                }}
-                              >
-                                Manage Resources
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedEvent(event)
-                                  setManageSkillsDialogOpen(true)
-                                }}
-                              >
-                                Manage Skills
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                             </>
@@ -391,7 +351,6 @@ export function Events({
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         organizationId={organizationId}
-        tags={tags}
         onSuccess={onEventsUpdated}
       />
 
@@ -401,7 +360,6 @@ export function Events({
         onOpenChange={setEditDialogOpen}
         organizationId={organizationId}
         event={selectedEvent}
-        tags={tags}
         onSuccess={onEventsUpdated}
       />
 
@@ -414,29 +372,6 @@ export function Events({
         onSuccess={onEventsUpdated}
       />
 
-      {/* Manage Event Resources Dialog */}
-      <ManageEventResourcesDialog
-        open={manageResourcesDialogOpen}
-        onOpenChange={setManageResourcesDialogOpen}
-        organizationId={organizationId}
-        eventId={selectedEvent?.id ?? null}
-        eventName={selectedEvent?.name ?? null}
-        resources={resources}
-        attachedResourceIds={selectedEvent?.resource_link_ids ?? []}
-        onSuccess={onEventsUpdated}
-      />
-
-      {/* Manage Event Skills Dialog */}
-      <ManageEventSkillsDialog
-        open={manageSkillsDialogOpen}
-        onOpenChange={setManageSkillsDialogOpen}
-        organizationId={organizationId}
-        eventId={selectedEvent?.id ?? null}
-        eventName={selectedEvent?.name ?? null}
-        skills={skills}
-        requiredSkillIds={selectedEvent?.skill_ids ?? []}
-        onSuccess={onEventsUpdated}
-      />
     </div>
   )
 }
