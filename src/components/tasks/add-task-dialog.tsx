@@ -432,19 +432,25 @@ export function AddTaskDialog({
               onInputValueChange={(value) => setAssigneeSearch(value)}
               autoHighlight
             >
-              <div ref={assigneeAnchorRef}>
-                <Input
-                  placeholder="Search members..."
-                  value={assigneeSearch}
-                  onChange={(e) => setAssigneeSearch(e.target.value)}
-                  className="w-full"
-                />
-                {selectedAssignee && !assigneeSearch && (
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    Selected: <span className="font-medium text-foreground">{selectedAssignee.label}</span>
-                  </div>
-                )}
-              </div>
+              <ComboboxChips ref={assigneeAnchorRef}>
+                <ComboboxValue>
+                  {(value: AssigneeOption | AssigneeOption[] | null) => {
+                    const current = Array.isArray(value) ? value[0] : value
+                    return (
+                      <React.Fragment>
+                        {current && (
+                          <ComboboxChip>
+                            {current.label}
+                          </ComboboxChip>
+                        )}
+                        {!current && (
+                          <ComboboxChipsInput placeholder="Search members..." />
+                        )}
+                      </React.Fragment>
+                    )
+                  }}
+                </ComboboxValue>
+              </ComboboxChips>
 
               <ComboboxContent anchor={assigneeAnchorRef}>
                 {!hasAnyAssigneeResults ? (
