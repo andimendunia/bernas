@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { TagBadge } from "@/components/ui/tag-badge"
 import { Plus, ExternalLink, Search, Filter, X, MoreVertical } from "lucide-react"
 import {
   DropdownMenu,
@@ -183,15 +183,15 @@ export function Resources({
             const tag = tags.find((t) => t.id === tagId)
             if (!tag) return null
             return (
-              <Badge
+              <TagBadge
                 key={tagId}
-                variant="secondary"
+                tagColor={tag.color}
                 className="cursor-pointer"
                 onClick={() => toggleTag(tagId)}
               >
                 {tag.name}
                 <X className="ml-1 size-3" />
-              </Badge>
+              </TagBadge>
             )
           })}
         </div>
@@ -240,9 +240,9 @@ export function Resources({
 
                     <div className="flex flex-wrap items-center gap-2 pl-7">
                       {resourceTags.map((tag) => (
-                        <Badge key={tag.id} variant="outline">
+                        <TagBadge key={tag.id} tagColor={tag.color}>
                           {tag.name}
-                        </Badge>
+                        </TagBadge>
                       ))}
                       {eventCount > 0 && (
                         <span className="text-xs text-muted-foreground">

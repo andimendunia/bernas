@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { TagBadge } from "@/components/ui/tag-badge"
 import { Plus, Search, FileText, Calendar } from "lucide-react"
 import { AddTagDialog } from "./add-tag-dialog"
 
@@ -114,9 +114,9 @@ export function Tags({
                         className="size-8 rounded-full border"
                         style={{ backgroundColor: tag.color ?? "#f2b5b5" }}
                       />
-                      <Badge variant="secondary" className="text-base font-medium">
+                      <TagBadge tagColor={tag.color}>
                         {tag.name}
-                      </Badge>
+                      </TagBadge>
                     </div>
 
                     {tag.totalUsage > 0 && (

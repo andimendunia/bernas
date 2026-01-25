@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { SkillBadge } from "@/components/ui/skill-badge"
 import { Plus, Search, Users } from "lucide-react"
 import { Member } from "@/lib/permissions"
 import { AddSkillDialog } from "./add-skill-dialog"
@@ -204,12 +204,15 @@ export function Skills({
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex flex-1 items-center gap-4">
                     <div className="flex items-center gap-3">
-                      <Badge 
-                        variant={currentMemberId && skill.memberIds.includes(currentMemberId) ? "default" : "secondary"} 
-                        className="text-base"
+                      <SkillBadge
+                        className={`text-base ${
+                          currentMemberId && skill.memberIds.includes(currentMemberId)
+                            ? "border-primary text-primary"
+                            : ""
+                        }`}
                       >
                         {skill.skill.name}
-                      </Badge>
+                      </SkillBadge>
                       {currentMemberId && skill.memberIds.includes(currentMemberId) && (
                         <span className="text-xs text-muted-foreground">
                           You have this skill

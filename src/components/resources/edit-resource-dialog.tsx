@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
+import { TagBadge } from "@/components/ui/tag-badge"
 import { X } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -192,9 +192,9 @@ export function EditResourceDialog({
               <>
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag) => (
-                    <Badge
+                    <TagBadge
                       key={tag.id}
-                      variant={selectedTags.includes(tag.id) ? "default" : "outline"}
+                      tagColor={tag.color}
                       className="cursor-pointer"
                       onClick={() => toggleTag(tag.id)}
                     >
@@ -202,7 +202,7 @@ export function EditResourceDialog({
                       {selectedTags.includes(tag.id) && (
                         <X className="ml-1 size-3" />
                       )}
-                    </Badge>
+                    </TagBadge>
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">

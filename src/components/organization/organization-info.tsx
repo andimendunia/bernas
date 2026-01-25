@@ -30,6 +30,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { SkillBadge } from "@/components/ui/skill-badge"
 import {
   Tooltip,
   TooltipContent,
@@ -170,16 +171,16 @@ export function OrganizationInfo({
         return (
           <div className="flex flex-wrap gap-1">
             {skills.slice(0, 3).map((skill) => (
-              <Badge key={skill.id} variant="outline" className="text-xs">
+              <SkillBadge key={skill.id} className="text-xs">
                 {skill.name}
-              </Badge>
+              </SkillBadge>
             ))}
             {remainingSkills.length > 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge variant="outline" className="text-xs">
+                  <SkillBadge className="text-xs">
                     +{remainingSkills.length}
-                  </Badge>
+                  </SkillBadge>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <div className="text-xs">
